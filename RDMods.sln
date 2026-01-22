@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36414.22
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RDLevelEditorAccess", "RDLevelEditorAccess\RDLevelEditorAccess.csproj", "{77226B71-EF73-4E3F-A323-CF60A50F1A9A}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{9FA3D6BD-1EC1-3BA5-80CB-CE02773A58D5}"
+	ProjectSection(SolutionItems) = preProject
+		Directory.Build.props = Directory.Build.props
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{77226B71-EF73-4E3F-A323-CF60A50F1A9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{77226B71-EF73-4E3F-A323-CF60A50F1A9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{77226B71-EF73-4E3F-A323-CF60A50F1A9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{77226B71-EF73-4E3F-A323-CF60A50F1A9A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EE3BC32C-880F-4DE9-9F0F-F02363563785}
+	EndGlobalSection
+EndGlobal

@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "RDLevelEditorAccess": {
+      "commandName": "Project",
+      "commandLineArgs": "D:\\SteamLibrary\\steamapps\\common\\Rhythm Doctor\\Rhythm Doctor.exe"
+    }
+  }
+}

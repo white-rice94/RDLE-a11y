@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <GameDir>D:\SteamLibrary\steamapps\common\Rhythm Doctor</GameDir>
+
+    <ModDeployDir>$(GameDir)\BepInEx\plugins</ModDeployDir>
+  </PropertyGroup>
+
+  <Target Name="CopyModToGameFolder" AfterTargets="Build">
+    
+    <Message Text="正在将 $(ProjectName) 复制到游戏目录..." Importance="High" />
+
+    <Copy SourceFiles="$(TargetPath)" 
+          DestinationFolder="$(ModDeployDir)" 
+          SkipUnchangedFiles="true" />
+
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" 
+          DestinationFolder="$(ModDeployDir)" 
+          Condition="Exists('$(TargetDir)$(TargetName).pdb')"
+          SkipUnchangedFiles="true" />
+          
+  </Target>
+
+</Project>
