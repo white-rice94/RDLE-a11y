@@ -154,6 +154,11 @@ namespace RDLevelEditorAccess
         /// <param name="menuName">当前菜单名称（用于调试或提示）</param>
         private void HandleGeneralUINavigation(GameObject rootObject, string menuName)
         {
+            bool isNavKey = Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.RightArrow) ||
+                Input.GetKeyDown(KeyCode.UpArrow) || Input.GetKeyDown(KeyCode.DownArrow) ||
+                Input.GetKeyDown(KeyCode.Tab);
+
+            if (!isNavKey && !Input.GetKeyDown(KeyCode.Return) && !Input.GetKeyDown(KeyCode.KeypadEnter)) return;
             if (rootObject == null) return;
 
             // 1. 查找所有可见的 UI 元素 (Graphic 是 Text, Image 的基类)
