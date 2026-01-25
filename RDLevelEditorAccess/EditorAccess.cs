@@ -61,6 +61,9 @@ namespace RDLevelEditorAccess
         private int currentIndex = -1;
         private string currentMenu = "";
         private List<Graphic> allControls;
+
+        private Tab currentTab;
+
         private float debugTimer = 0f;
 
         private InputFieldReader inputFieldReader;
@@ -371,8 +374,11 @@ namespace RDLevelEditorAccess
 
         private void HandleTimelineNavigation()
         {
-            // 已删除。
-            // 游戏原生支持左右键切换事件，无需 Mod 干预。
+                if (scnEditor.instance.currentTab != currentTab)
+            {
+                currentTab = scnEditor.instance.currentTab;
+                Narration.Say(RDString.Get($"editor.{currentTab.ToString().ToLower().Replace("song", "sounds")}"),NarrationCategory.Navigation);
+            }
         }
     }
 
