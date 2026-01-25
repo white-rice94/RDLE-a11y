@@ -57,6 +57,10 @@ namespace RDLevelEditorAccess
         public static AccessLogic Instance { get; private set; }
 
         private GameObject lastSelectedObj; // 记录上一次朗读的 UI 对象
+        private EventSystem targetEventSystem = null;
+        private int currentIndex = -1;
+        private string currentMenu = "";
+        private List<Graphic> allControls;
         private float debugTimer = 0f;
 
         private InputFieldReader inputFieldReader;
@@ -83,6 +87,11 @@ namespace RDLevelEditorAccess
             }
 
             if (scnEditor.instance == null) return;
+
+            if (Input.GetKeyDown(KeyCode.F1))
+            {
+                Debug.Log($"编辑状态： {scnEditor.instance.userIsEditingAnInputField}， 当前菜单： {currentMenu}");
+            }
 
             if (Input.GetKeyDown(KeyCode.F10))
             {
@@ -146,7 +155,7 @@ namespace RDLevelEditorAccess
             if (es != null && es.currentSelectedGameObject != null && scnEditor.instance.userIsEditingAnInputField)
             {
                 inputFieldReader.UpdateReader(es.currentSelectedGameObject);
-                return;
+                //return;
             }
 
             // 检测导航按键
@@ -157,67 +166,67 @@ namespace RDLevelEditorAccess
 
             if (!isNavKey && !isEnterKey) return;
 
-            // --- [修复 2] 智能过滤列表 ---
-            // 查找所有可见的 UI 元素，但过滤掉纯背景图片
-            var allControls = rootObject.GetComponentsInChildren<Graphic>()
-                .Where(g => g.gameObject.activeInHierarchy)
-                .Where(g => {
-                    // A. 如果是可交互的 (Selectable)，保留 (按钮、开关、输入框)
-                    if (g.GetComponent<Selectable>() != null) return true;
-                    // B. 如果是纯文本 (Text/TMP)，保留 (用于朗读标签)
-                    if (g is Text || g is TMPro.TMP_Text) return true;
-                    // C. 既不是按钮也不是字 (比如纯 Image 背景)，视为噪音，过滤掉
-                    return false;
-                })
-                .ToList();
-            foreach (var item in allControls)
+            if (menuName != currentMenu)
             {
-                Debug.Log(item.name);
-            }
-            if (allControls.Count == 0) return;
+                currentMenu = menuName;
+                // --- [修复 2] 智能过滤列表 ---
+                // 查找所有可见的 UI 元素，但过滤掉纯背景图片
+                allControls = rootObject.GetComponentsInChildren<Graphic>()
+                    .Where(g => g.gameObject.activeInHierarchy)
+                    .Where(g =>
+                    {
+                        // A. 如果是可交互的 (Selectable)，保留 (按钮、开关、输入框)
+                        if (g.GetComponent<Selectable>() != null) return true;
+                        // B. 如果是纯文本 (Text/TMP)，保留 (用于朗读标签)
+                        if (g is Text || g is TMPro.TMP_Text) return true;
+                        // C. 既不是按钮也不是字 (比如纯 Image 背景)，视为噪音，过滤掉
+                        return false;
+                    })
+                    .ToList();
+                foreach (var item in allControls)
+                {
+                    Debug.Log(item.name);
+                }
+                if (allControls.Count == 0) return;
 
-            // 视觉排序 (从上到下，从左到右)
-            allControls.Sort((a, b) =>
-            {
-                var posA = a.transform.position;
-                var posB = b.transform.position;
-                int yComparison = posB.y.CompareTo(posA.y); // Y轴降序
-                if (yComparison != 0) return yComparison;
-                return posA.x.CompareTo(posB.x); // X轴升序
-            });
+                // 视觉排序 (从上到下，从左到右)
+                allControls.Sort((a, b) =>
+                {
+                    var posA = a.transform.position;
+                    var posB = b.transform.position;
+                    int yComparison = posB.y.CompareTo(posA.y); // Y轴降序
+                    if (yComparison != 0) return yComparison;
+                    return posA.x.CompareTo(posB.x); // X轴升序
+                });
 
-            // 获取事件系统
-            var targetEventSystem = scnEditor.instance.eventSystem ?? EventSystem.current;
-            if (targetEventSystem == null) return;
+                // 获取事件系统
+                targetEventSystem = scnEditor.instance.eventSystem ?? EventSystem.current;
+                if (targetEventSystem == null) return;
 
-            // 确定当前位置
-            var currentObj = targetEventSystem.currentSelectedGameObject;
-            int currentIndex = -1;
+                CustomUINavigator.DisableNativeNavigation(targetEventSystem);
+                Narration.Say(menuName, NarrationCategory.Instruction);
 
-            if (currentObj != null)
-            {
-                currentIndex = allControls.FindIndex(s => s.gameObject == currentObj);
-            }
+                // 确定当前位置
+                currentIndex = -1;
 
-            // 初始化选中
-            if (currentIndex == -1)
-            {
-                if (allControls.Count > 0) SelectUIElement(allControls[0], targetEventSystem);
-                    //Narration.Say(menuName, NarrationCategory.Instruction);
-                return;
+                // 初始化选中
+                if (currentIndex == -1)
+                {
+                    if (allControls.Count > 0) SelectUIElement(allControls[0], targetEventSystem);
+                    return;
+                }
             }
 
             // 处理方向逻辑
             int direction = 0;
             bool isTab = false;
 
-            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.UpArrow)) direction = -1;
-            else if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.DownArrow)) direction = 1;
+            if ((Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.UpArrow)) && !scnEditor.instance.userIsEditingAnInputField) direction = -1;
+            else if ((Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.DownArrow)) && !scnEditor.instance.userIsEditingAnInputField) direction = 1;
             else if (Input.GetKeyDown(KeyCode.Tab))
             {
-                if (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)) direction = -1;
-                else direction = 1;
                 isTab = true;
+                direction = (Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift)) ? -1 : 1;
             }
 
             // 执行导航
@@ -232,19 +241,39 @@ namespace RDLevelEditorAccess
                 }
                 else
                 {
-                    // Tab 模式：跳跃遍历 (只停留在 Selectable 上)
-                    int targetIndex = newIndex;
-                    while (true)
-                    {
-                        targetIndex += direction;
-                        // 边界保护
-                        if (targetIndex < 0 || targetIndex >= allControls.Count) break;
+                    // [修复] Tab 模式：使用循环算法查找下一个可交互对象
+                    // 之前的 while 循环撞墙就停了，现在改用取模运算来实现首尾相接
+                    int count = allControls.Count;
+                    int foundIndex = -1;
 
-                        if (allControls[targetIndex].GetComponent<Selectable>() != null)
+                    // 从下一个位置开始，最多找一圈 (1 到 count-1)
+                    // 避免死循环，也避免重复选中自己
+                    for (int i = 1; i < count; i++)
+                    {
+                        // 核心算法：(当前位置 + 偏移量) % 总数
+                        // 这样算出来的 index 永远会在 0 到 count-1 之间循环
+                        int checkIndex = (currentIndex + direction * i) % count;
+
+                        // C# 的取模可能是负数，需要修正 (例如 -1 % 5 = -1，我们需要的是 4)
+                        if (checkIndex < 0) checkIndex += count;
+
+                        // 检查是否有效
+                        if (checkIndex >= 0 && checkIndex < count)
                         {
-                            newIndex = targetIndex;
-                            break;
+                            var element = allControls[checkIndex];
+                            // 只有当它是 Selectable (按钮/输入框) 且 激活状态 时才停下
+                            if (element != null && element.GetComponent<Selectable>() != null && element.isActiveAndEnabled)
+                            {
+                                foundIndex = checkIndex;
+                                break;
+                            }
                         }
+                    }
+
+                    // 如果找到了合法的目标，才更新位置；没找到就保持原地不动
+                    if (foundIndex != -1)
+                    {
+                        newIndex = foundIndex;
                     }
                 }
 
@@ -253,6 +282,7 @@ namespace RDLevelEditorAccess
                 if (newIndex < 0) newIndex = allControls.Count - 1;
 
                 SelectUIElement(allControls[newIndex], targetEventSystem);
+                currentIndex = newIndex;
             }
 
             // 处理确认键

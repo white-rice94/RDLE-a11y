@@ -23,7 +23,7 @@ namespace RDLevelEditorAccess
         /// <param name="currentObj">当前 EventSystem.currentSelectedGameObject</param>
         public void UpdateReader(GameObject currentObj)
         {
-            Debug.Log("检测到输入框。");
+            //Debug.Log("检测到输入框。");
             // 1. 基础有效性检查：如果没有选中物体，重置状态
             if (currentObj == null)
             {
