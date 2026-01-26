@@ -425,5 +425,12 @@ namespace RDLevelEditorAccess
         {
             Narration.Say(ModUtils.eventSelectI18n(newControl.levelEvent), NarrationCategory.Navigation);
         }
+
+        [HarmonyPatch("AddEventControlToSelection")]
+        [HarmonyPostfix]
+        public static void AddEventControlToSelectionPostfix(LevelEventControl_Base newControl)
+        {
+            Narration.Say("已选择" + ModUtils.eventSelectI18n(newControl.levelEvent), NarrationCategory.Navigation);
+        }
     }
 }
