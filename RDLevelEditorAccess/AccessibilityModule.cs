@@ -23,8 +23,8 @@ namespace RDLevelEditorAccess
 
             _pipeServer = new PipeServer();
             
-            // 尝试连接 Helper（如果未运行会自动启动）
-            _pipeServer.Connect(3000);
+            // 尝试连接 Helper（异步尝试，不阻塞）
+            // 实际连接会在用户按 Ctrl+Enter 时进行
             
             Debug.Log("[RDEditorAccess] AccessibilityBridge 已初始化");
         }
