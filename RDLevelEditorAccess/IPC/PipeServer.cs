@@ -21,8 +21,6 @@ namespace RDLevelEditorAccess.IPC
         private const string HelperExeName = "RDEventEditorHelper.exe";
 
         private NamedPipeClientStream _pipeClient;
-        private StreamReader _reader;
-        private StreamWriter _writer;
         private Thread _receiveThread;
         private bool _isConnected;
         private LevelEvent_Base _currentEvent;
@@ -40,9 +38,6 @@ namespace RDLevelEditorAccess.IPC
             {
                 _pipeClient = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.None);
                 _pipeClient.Connect(timeoutMs);
-
-                _reader = new StreamReader(_pipeClient);
-                _writer = new StreamWriter(_pipeClient) { AutoFlush = true };
 
                 _isConnected = true;
                 Debug.Log("[Pipe] 已连接到 Helper");
@@ -118,9 +113,6 @@ namespace RDLevelEditorAccess.IPC
                 _pipeClient = new NamedPipeClientStream(".", PipeName, PipeDirection.InOut, PipeOptions.None);
                 _pipeClient.Connect(timeoutMs);
 
-                _reader = new StreamReader(_pipeClient);
-                _writer = new StreamWriter(_pipeClient) { AutoFlush = true };
-
                 _isConnected = true;
                 Debug.Log("[Pipe] 已连接到 Helper");
 
@@ -134,7 +126,6 @@ namespace RDLevelEditorAccess.IPC
             catch (TimeoutException)
             {
                 Debug.LogWarning("[Pipe] 连接超时，Helper 可能未启动");
-                TryStartHelper();
                 return false;
             }
             catch (Exception ex)
@@ -199,9 +190,20 @@ namespace RDLevelEditorAccess.IPC
         {
             try
             {
+                if (_pipeClient == null || !_pipeClient.IsConnected)
+                {
+                    Debug.LogWarning("[Pipe] 管道未连接");
+                    return;
+                }
+
                 string json = message.ToJson();
-                _writer.WriteLine(json);
-                Debug.Log($"[Pipe] 发送消息: {message.Type}");
+                Debug.Log($"[Pipe] 发送消息内容: {json.Substring(0, Math.Min(100, json.Length))}...");
+                
+                var bytes = System.Text.Encoding.UTF8.GetBytes(json + "\n");
+                _pipeClient.Write(bytes, 0, bytes.Length);
+                _pipeClient.Flush();
+                
+                Debug.Log($"[Pipe] 发送消息完成: {message.Type}");
             }
             catch (Exception ex)
             {
@@ -214,17 +216,34 @@ namespace RDLevelEditorAccess.IPC
         {
             try
             {
+                var buffer = new byte[4096];
+                var messageBuffer = new System.Collections.Generic.List<byte>();
+
                 while (_isConnected && _pipeClient.IsConnected)
                 {
-                    string json = _reader.ReadLine();
-                    if (string.IsNullOrEmpty(json)) break;
+                    int bytesRead = _pipeClient.Read(buffer, 0, buffer.Length);
+                    if (bytesRead <= 0) break;
 
-                    Debug.Log($"[Pipe] 收到消息: {json.Substring(0, Math.Min(50, json.Length))}...");
+                    for (int i = 0; i < bytesRead; i++)
+                    {
+                        if (buffer[i] == '\n')
+                        {
+                            string json = System.Text.Encoding.UTF8.GetString(messageBuffer.ToArray());
+                            messageBuffer.Clear();
 
-                    var message = PipeMessage.FromJson(json);
-                    if (message == null) continue;
+                            if (string.IsNullOrEmpty(json)) continue;
+                            Debug.Log($"[Pipe] 收到消息: {json.Substring(0, Math.Min(50, json.Length))}...");
 
-                    ProcessMessage(message);
+                            var message = PipeMessage.FromJson(json);
+                            if (message == null) continue;
+
+                            ProcessMessage(message);
+                        }
+                        else
+                        {
+                            messageBuffer.Add(buffer[i]);
+                        }
+                    }
                 }
             }
             catch (Exception ex)
