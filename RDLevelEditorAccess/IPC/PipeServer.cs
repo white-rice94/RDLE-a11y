@@ -155,6 +155,7 @@ namespace RDLevelEditorAccess.IPC
         {
             if (!_isConnected)
             {
+                Debug.LogWarning("[Pipe] 未连接，尝试连接...");
                 if (!Connect())
                 {
                     Debug.LogWarning("[Pipe] 无法连接，跳过打开编辑器");
@@ -162,9 +163,11 @@ namespace RDLevelEditorAccess.IPC
                 }
             }
 
+            Debug.Log("[Pipe] 开始提取属性...");
             _currentEvent = levelEvent;
 
             var properties = ExtractProperties(levelEvent);
+            Debug.Log($"[Pipe] 属性提取完成，共 {properties.Count} 个属性");
 
             var message = new PipeMessage
             {
@@ -174,7 +177,9 @@ namespace RDLevelEditorAccess.IPC
                 Properties = properties
             };
 
+            Debug.Log("[Pipe] 正在发送消息...");
             SendMessage(message);
+            Debug.Log("[Pipe] 消息已发送");
         }
 
         public void SendCloseEditor()
@@ -301,14 +306,25 @@ namespace RDLevelEditorAccess.IPC
         {
             if (value == null) return "";
 
-            if (value is UnityEngine.Vector2 v2) return $"{v2.x},{v2.y}";
-            if (value is UnityEngine.Vector3 v3) return $"{v3.x},{v3.y},{v3.z}";
-            if (value is UnityEngine.Color c) return $"#{UnityEngine.ColorUtility.ToHtmlStringRGB(c)}";
-            if (value is Enum e) return e.ToString();
-            if (value is bool b) return b ? "true" : "false";
-            if (value is int i) return i.ToString();
-            if (value is float f) return f.ToString();
-            if (value is double d) return d.ToString();
+            try
+            {
+                if (value is UnityEngine.Vector2 v2) return $"{v2.x},{v2.y}";
+                if (value is UnityEngine.Vector3 v3) return $"{v3.x},{v3.y},{v3.z}";
+                if (value is UnityEngine.Color c) 
+                {
+                    try { return $"#{UnityEngine.ColorUtility.ToHtmlStringRGB(c)}"; } 
+                    catch { return c.ToString(); }
+                }
+                if (value is Enum e) return e.ToString();
+                if (value is bool b) return b ? "true" : "false";
+                if (value is int i) return i.ToString();
+                if (value is float f) return f.ToString();
+                if (value is double d) return d.ToString();
+            }
+            catch (Exception ex)
+            {
+                Debug.LogWarning($"[Pipe] 属性转换异常: {ex.Message}");
+            }
 
             return value.ToString();
         }
