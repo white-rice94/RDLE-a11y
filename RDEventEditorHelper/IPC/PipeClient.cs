@@ -13,6 +13,9 @@ namespace RDEventEditorHelper.IPC
     public class PipeClient
     {
         private const string PipeName = "RDEventEditor";
+        private static readonly string LogPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "RDEventEditorHelper.log");
+        private static readonly object LogLock = new object();
+
         private Thread _listenThread;
         private NamedPipeServerStream _pipeServer;
         private bool _isRunning;
@@ -24,18 +27,35 @@ namespace RDEventEditorHelper.IPC
         public event Action<PipeMessage> OnMessageReceived;
         public EditorForm EditorForm { get; set; }
 
+        private static void Log(string msg)
+        {
+            try
+            {
+                lock (LogLock)
+                {
+                    using var fs = new FileStream(LogPath, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
+                    using var sw = new StreamWriter(fs);
+                    sw.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] {msg}");
+                    sw.Flush();
+                }
+            }
+            catch { }
+        }
+
         public void Start()
         {
+            Log("PipeClient 启动");
             _isRunning = true;
             _listenThread = new Thread(ListenForConnections);
             _listenThread.IsBackground = true;
             _listenThread.Start();
-            Console.WriteLine("[PipeClient] 已启动，等待主 Mod 连接...");
+            Log("等待主 Mod 连接...");
         }
 
         public void Stop()
         {
             _isRunning = false;
+            Log("PipeClient 停止");
             _pipeServer?.Dispose();
             _currentPipe?.Dispose();
         }
@@ -48,16 +68,16 @@ namespace RDEventEditorHelper.IPC
                 {
                     string json = message.ToJson();
                     _currentWriter.WriteLine(json);
-                    Console.WriteLine($"[PipeClient] 发送消息: {json.Substring(0, Math.Min(50, json.Length))}...");
+                    Log($"发送消息: {message.Type}");
                 }
                 else
                 {
-                    Console.WriteLine("[PipeClient] 无法发送，管道未连接");
+                    Log("无法发送，管道未连接");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[PipeClient] 发送消息失败: {ex.Message}");
+                Log($"发送消息失败: {ex.Message}");
             }
         }
 
@@ -67,6 +87,7 @@ namespace RDEventEditorHelper.IPC
             {
                 try
                 {
+                    Log("创建命名管道...");
                     _pipeServer = new NamedPipeServerStream(
                         PipeName,
                         PipeDirection.InOut,
@@ -74,9 +95,10 @@ namespace RDEventEditorHelper.IPC
                         PipeTransmissionMode.Message,
                         PipeOptions.Asynchronous);
 
+                    Log("等待连接...");
                     // 等待连接
                     _pipeServer.WaitForConnection();
-                    Console.WriteLine("[PipeClient] 主 Mod 已连接");
+                    Log("主 Mod 已连接!");
 
                     // 保存当前连接
                     _currentPipe = _pipeServer;
@@ -84,13 +106,13 @@ namespace RDEventEditorHelper.IPC
                     // 处理连接
                     HandleConnection(_pipeServer);
                 }
-                catch (IOException)
+                catch (IOException ex)
                 {
-                    // 管道被关闭，继续等待
+                    Log($"IO异常: {ex.Message}");
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"[PipeClient] 监听异常: {ex.Message}");
+                    Log($"监听异常: {ex.Message}");
                 }
                 finally
                 {
@@ -106,53 +128,75 @@ namespace RDEventEditorHelper.IPC
         {
             try
             {
+                Log("开始处理连接...");
                 using var reader = new StreamReader(pipeServer);
                 _currentWriter = new StreamWriter(pipeServer) { AutoFlush = true };
 
                 while (pipeServer.IsConnected)
                 {
+                    Log("等待读取消息...");
                     // 读取消息
                     string json = reader.ReadLine();
-                    if (string.IsNullOrEmpty(json)) break;
+                    if (string.IsNullOrEmpty(json))
+                    {
+                        Log("收到空消息，退出循环");
+                        break;
+                    }
 
-                    Console.WriteLine($"[PipeClient] 收到消息: {json.Substring(0, Math.Min(100, json.Length))}...");
+                    Log($"收到消息: {json.Substring(0, Math.Min(100, json.Length))}...");
 
                     var message = PipeMessage.FromJson(json);
-                    if (message == null) continue;
+                    if (message == null)
+                    {
+                        Log("消息解析失败");
+                        continue;
+                    }
+
+                    Log($"处理消息类型: {message.Type}");
 
                     // 处理消息
                     string response = ProcessMessage(message);
-                    
+
                     // 发送响应
                     if (!string.IsNullOrEmpty(response))
                     {
                         _currentWriter.WriteLine(response);
-                        Console.WriteLine($"[PipeClient] 发送响应: {response.Substring(0, Math.Min(50, response.Length))}...");
+                        Log($"发送响应: {message.Type}");
                     }
                 }
+                Log("连接已关闭");
             }
-            catch (IOException)
+            catch (IOException ex)
             {
-                // 连接关闭
+                Log($"IO异常 (连接关闭): {ex.Message}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[PipeClient] 处理连接异常: {ex.Message}");
+                Log($"处理连接异常: {ex.Message}");
             }
         }
 
         private string ProcessMessage(PipeMessage message)
         {
+            Log($"ProcessMessage: {message.Type}");
+
             switch (message.Type)
             {
                 case MessageType.OpenEditor:
+                    Log($"OpenEditor: {message.EventType}, 属性数量: {message.Properties?.Count ?? 0}");
                     // 在 UI 线程上显示编辑器
                     if (EditorForm != null)
                     {
                         EditorForm.Invoke(new Action(() =>
                         {
+                            Log("调用 ShowEditor...");
                             EditorForm.ShowEditor(message.EventType, message.Properties);
+                            Log("ShowEditor 调用完成");
                         }));
+                    }
+                    else
+                    {
+                        Log("EditorForm 为空!");
                     }
                     return null; // 无需响应
 
@@ -167,7 +211,7 @@ namespace RDEventEditorHelper.IPC
                     return null;
 
                 default:
-                    Console.WriteLine($"[PipeClient] 未知消息类型: {message.Type}");
+                    Log($"未知消息类型: {message.Type}");
                     return null;
             }
         }

@@ -269,11 +269,13 @@ namespace RDLevelEditorAccess.IPC
             {
                 if (prop.enableIf != null && !prop.enableIf(ev)) continue;
 
+                var rawValue = prop.propertyInfo.GetValue(ev);
+
                 var dto = new PropertyData
                 {
                     Name = prop.propertyInfo.Name,
                     DisplayName = prop.name,
-                    Value = prop.propertyInfo.GetValue(ev)
+                    Value = ConvertPropertyValue(rawValue)
                 };
 
                 if (prop is IntPropertyInfo) dto.Type = "Int";
@@ -293,6 +295,22 @@ namespace RDLevelEditorAccess.IPC
             }
 
             return list;
+        }
+
+        private string ConvertPropertyValue(object value)
+        {
+            if (value == null) return "";
+
+            if (value is UnityEngine.Vector2 v2) return $"{v2.x},{v2.y}";
+            if (value is UnityEngine.Vector3 v3) return $"{v3.x},{v3.y},{v3.z}";
+            if (value is UnityEngine.Color c) return $"#{UnityEngine.ColorUtility.ToHtmlStringRGB(c)}";
+            if (value is Enum e) return e.ToString();
+            if (value is bool b) return b ? "true" : "false";
+            if (value is int i) return i.ToString();
+            if (value is float f) return f.ToString();
+            if (value is double d) return d.ToString();
+
+            return value.ToString();
         }
 
         private void ApplyChangesToEvent(LevelEvent_Base ev, Dictionary<string, object> updates)

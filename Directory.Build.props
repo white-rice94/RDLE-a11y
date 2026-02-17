@@ -3,6 +3,7 @@
     <GameDir>D:\SteamLibrary\steamapps\common\Rhythm Doctor</GameDir>
 
     <ModDeployDir>$(GameDir)\BepInEx\plugins</ModDeployDir>
+    <HelperDeployDir>$(GameDir)</HelperDeployDir>
   </PropertyGroup>
 
   <Target Name="CopyModToGameFolder" AfterTargets="Build">
@@ -18,6 +19,16 @@
           Condition="Exists('$(TargetDir)$(TargetName).pdb')"
           SkipUnchangedFiles="true" />
           
+  </Target>
+
+  <Target Name="CopyHelperToGameFolder" AfterTargets="Build" Condition="'$(ProjectName)'=='RDEventEditorHelper'">
+    
+    <Message Text="正在将 Helper 复制到游戏根目录..." Importance="High" />
+
+    <Copy SourceFiles="$(TargetPath)" 
+          DestinationFolder="$(HelperDeployDir)" 
+          SkipUnchangedFiles="true" />
+
   </Target>
 
 </Project>
