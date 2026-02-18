@@ -292,32 +292,67 @@ namespace RDLevelEditorAccess.IPC
         private string GetLocalizedPropertyName(LevelEvent_Base ev, BasePropertyInfo prop)
         {
             string propertyName = prop.name;
+            string localized;
 
             // 如果有自定义本地化键，直接使用
             if (!string.IsNullOrEmpty(prop.customLocalizationKey))
             {
-                return RDString.Get(prop.customLocalizationKey);
+                localized = RDString.Get(prop.customLocalizationKey);
             }
-
-            // 尝试特定于事件类型的键: editor.{eventType}.{propertyName}
-            string specificKey = $"editor.{ev.type}.{propertyName}";
-            string localized = RDString.GetWithCheck(specificKey, out bool exists);
-            if (exists)
+            else
             {
-                return localized;
+                // 尝试特定于事件类型的键: editor.{eventType}.{propertyName}
+                string specificKey = $"editor.{ev.type}.{propertyName}";
+                localized = RDString.GetWithCheck(specificKey, out bool exists);
+                if (!exists)
+                {
+                    // 尝试通用键: editor.{propertyName}
+                    string genericKey = $"editor.{propertyName}";
+                    localized = RDString.GetWithCheck(genericKey, out exists);
+                    if (!exists)
+                    {
+                        // 如果都没有找到，返回原始属性名
+                        Debug.LogWarning($"[FileIPC] 未找到属性 '{propertyName}' 的本地化键");
+                        localized = propertyName;
+                    }
+                }
             }
 
-            // 尝试通用键: editor.{propertyName}
-            string genericKey = $"editor.{propertyName}";
-            localized = RDString.GetWithCheck(genericKey, out exists);
-            if (exists)
+            // 过滤富文本颜色标签: <color=#...>...</color> 和 </color>
+            return StripRichTextTags(localized);
+        }
+
+        private string StripRichTextTags(string text)
+        {
+            if (string.IsNullOrEmpty(text)) return text;
+
+            // 移除 <color=#...>...</color> 标签
+            // 使用简单的字符串操作而不是正则，避免性能问题
+            string result = text;
+            int colorStart = result.IndexOf("<color=");
+            while (colorStart >= 0)
             {
-                return localized;
+                int colorEnd = result.IndexOf(">", colorStart);
+                if (colorEnd > colorStart)
+                {
+                    // 移除 <color=#...> 标签
+                    result = result.Substring(0, colorStart) + result.Substring(colorEnd + 1);
+                    
+                    // 查找并移除对应的 </color> 结束标签
+                    int closeTagStart = result.IndexOf("</color>", colorStart);
+                    if (closeTagStart >= 0)
+                    {
+                        result = result.Substring(0, closeTagStart) + result.Substring(closeTagStart + 8);
+                    }
+                }
+                else
+                {
+                    break;
+                }
+                colorStart = result.IndexOf("<color=", colorStart);
             }
 
-            // 如果都没有找到，返回原始属性名
-            Debug.LogWarning($"[FileIPC] 未找到属性 '{propertyName}' 的本地化键");
-            return propertyName;
+            return result;
         }
 
         private string ConvertPropertyValue(object value)
