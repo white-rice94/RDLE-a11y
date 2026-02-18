@@ -57,9 +57,10 @@ namespace RDLevelEditorAccess.IPC
 
             try
             {
-                string json = JsonSerializer.Serialize(sourceData, new JsonSerializerOptions { WriteIndented = true });
+                var options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+                string json = JsonSerializer.Serialize(sourceData, options);
                 File.WriteAllText(_sourcePath, json);
-                Debug.Log($"[FileIPC] 已写入 source.json");
+                Debug.Log($"[FileIPC] 已写入 source.json: {json.Length} 字符");
             }
             catch (Exception ex)
             {
@@ -151,11 +152,15 @@ namespace RDLevelEditorAccess.IPC
                 return;
             }
 
+            Debug.Log($"[FileIPC] 解析 result.json: {json}");
+
             try
             {
-                var resultData = JsonSerializer.Deserialize<ResultData>(json);
+                var options = new JsonSerializerOptions { IncludeFields = true };
+                var resultData = JsonSerializer.Deserialize<ResultData>(json, options);
+                Debug.Log($"[FileIPC] 解析结果: action={resultData?.action}, updates={(resultData?.updates != null ? resultData.updates.Count : 0)}项");
 
-                if (resultData.action == "cancel")
+                if (resultData?.action == "cancel")
                 {
                     Debug.Log("[FileIPC] 用户取消编辑");
                     return;
