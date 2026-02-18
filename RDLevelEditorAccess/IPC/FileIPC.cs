@@ -260,10 +260,13 @@ namespace RDLevelEditorAccess.IPC
 
                 var rawValue = prop.propertyInfo.GetValue(ev);
 
+                // 获取本地化的显示名称
+                string localizedName = GetLocalizedPropertyName(ev, prop);
+
                 var dto = new PropertyData
                 {
                     name = prop.propertyInfo.Name,
-                    displayName = prop.name,
+                    displayName = localizedName,
                     value = ConvertPropertyValue(rawValue)
                 };
 
@@ -284,6 +287,37 @@ namespace RDLevelEditorAccess.IPC
             }
 
             return list;
+        }
+
+        private string GetLocalizedPropertyName(LevelEvent_Base ev, BasePropertyInfo prop)
+        {
+            string propertyName = prop.name;
+
+            // 如果有自定义本地化键，直接使用
+            if (!string.IsNullOrEmpty(prop.customLocalizationKey))
+            {
+                return RDString.Get(prop.customLocalizationKey);
+            }
+
+            // 尝试特定于事件类型的键: editor.{eventType}.{propertyName}
+            string specificKey = $"editor.{ev.type}.{propertyName}";
+            string localized = RDString.GetWithCheck(specificKey, out bool exists);
+            if (exists)
+            {
+                return localized;
+            }
+
+            // 尝试通用键: editor.{propertyName}
+            string genericKey = $"editor.{propertyName}";
+            localized = RDString.GetWithCheck(genericKey, out exists);
+            if (exists)
+            {
+                return localized;
+            }
+
+            // 如果都没有找到，返回原始属性名
+            Debug.LogWarning($"[FileIPC] 未找到属性 '{propertyName}' 的本地化键");
+            return propertyName;
         }
 
         private string ConvertPropertyValue(object value)
