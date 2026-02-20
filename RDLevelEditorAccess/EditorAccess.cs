@@ -405,16 +405,136 @@ namespace RDLevelEditorAccess
 
         private void chooseNearestEvent()
         {
-            var allEvent = scnEditor.instance.eventControls;
-            Debug.Log($"事件数量： {allEvent.Count}， 当前小结： {scnEditor.instance.startBar}");
-            foreach (var ev in allEvent)
+            var editor = scnEditor.instance;
+            if (editor == null) return;
+
+            // 1. 根据当前 Tab 获取正确的事件列表
+            var targetList = GetEventListForCurrentTab(editor);
+            if (targetList == null || targetList.Count == 0)
             {
-                if (ev.levelEvent.tab != currentTab) continue;
-                if (ev.levelEvent.bar != scnEditor.instance.startBar + 1) continue;
-                scnEditor.instance.SelectEventControl(ev, true);
+                Debug.Log($"[chooseNearestEvent] 当前 Tab ({currentTab}) 无事件列表或列表为空");
+                Narration.Say("无可用事件", NarrationCategory.Navigation);
                 return;
             }
-            Narration.Say("无可用事件", NarrationCategory.Navigation);
+
+            // 2. 过滤和排序（与原生 GetControlToTheLeft 逻辑一致）
+            var validEvents = targetList
+                .Where(c => c != null && !c.isBase && editor.EventIsVisible(c.levelEvent))
+                .OrderBy(c => c.levelEvent.sortOrder)
+                .ThenBy(c => c.levelEvent.y)
+                .ToList();
+
+            if (validEvents.Count == 0)
+            {
+                Debug.Log($"[chooseNearestEvent] 过滤后无有效事件");
+                Narration.Say("无可用事件", NarrationCategory.Navigation);
+                return;
+            }
+
+            // 3. 优先选择当前小节的事件
+            int currentBar = editor.startBar + 1;
+            var currentBarEvents = validEvents.Where(c => c.levelEvent.bar == currentBar).ToList();
+
+            LevelEventControl_Base toSelect;
+            if (currentBarEvents.Count > 0)
+            {
+                // 当前小节有事件，选择第一个
+                toSelect = currentBarEvents.First();
+                Debug.Log($"[chooseNearestEvent] 选择当前小节 {currentBar} 的事件: {toSelect.levelEvent.type}");
+            }
+            else
+            {
+                // 当前小节没有事件，选择最接近视图中心的事件
+                toSelect = FindNearestToViewCenter(validEvents, editor);
+                Debug.Log($"[chooseNearestEvent] 当前小节无事件，选择最近事件: {toSelect.levelEvent.type} (bar={toSelect.levelEvent.bar})");
+            }
+
+            editor.SelectEventControl(toSelect, true);
+        }
+
+        /// <summary>
+        /// 根据当前 Tab 获取对应的事件列表
+        /// </summary>
+        private List<LevelEventControl_Base> GetEventListForCurrentTab(scnEditor editor)
+        {
+            switch (editor.currentTab)
+            {
+                case Tab.Song:
+                    return editor.eventControls_sounds;
+                case Tab.Actions:
+                    return editor.eventControls_actions;
+                case Tab.Rows:
+                    return GetSelectedRowList(editor);
+                case Tab.Rooms:
+                    return editor.eventControls_rooms;
+                case Tab.Sprites:
+                    return GetSelectedSpriteList(editor);
+                case Tab.Windows:
+                    return editor.eventControls_windows;
+                default:
+                    return editor.eventControls;
+            }
+        }
+
+        /// <summary>
+        /// 获取当前选中 row 的事件列表
+        /// </summary>
+        private List<LevelEventControl_Base> GetSelectedRowList(scnEditor editor)
+        {
+            int rowIndex = editor.selectedRowIndex;
+            // selectedRowIndex 为 -1 表示未选中任何 row
+            if (rowIndex < 0 || rowIndex >= editor.eventControls_rows.Count)
+            {
+                Debug.Log($"[GetSelectedRowList] 无效的 rowIndex: {rowIndex}, rows 数量: {editor.eventControls_rows.Count}");
+                return null;
+            }
+            return editor.eventControls_rows[rowIndex];
+        }
+
+        /// <summary>
+        /// 获取当前选中 sprite 的事件列表
+        /// </summary>
+        private List<LevelEventControl_Base> GetSelectedSpriteList(scnEditor editor)
+        {
+            string spriteId = editor.selectedSprite;
+            if (string.IsNullOrEmpty(spriteId))
+            {
+                Debug.Log($"[GetSelectedSpriteList] 未选中任何 sprite");
+                return null;
+            }
+
+            // 根据 spriteId 查找对应的索引
+            for (int i = 0; i < editor.spritesData.Count; i++)
+            {
+                if (editor.spritesData[i].spriteId == spriteId)
+                {
+                    if (i < editor.eventControls_sprites.Count)
+                    {
+                        return editor.eventControls_sprites[i];
+                    }
+                    break;
+                }
+            }
+
+            Debug.Log($"[GetSelectedSpriteList] 未找到 sprite: {spriteId}");
+            return null;
+        }
+
+        /// <summary>
+        /// 找到最接近视图中心的事件
+        /// </summary>
+        private LevelEventControl_Base FindNearestToViewCenter(List<LevelEventControl_Base> events, scnEditor editor)
+        {
+            if (events == null || events.Count == 0) return null;
+            if (events.Count == 1) return events[0];
+
+            // 使用时间轴视图中心位置
+            float centerX = editor.timelineScript.center;
+
+            // 按 x 位置距离排序，选择最近的事件
+            return events
+                .OrderBy(c => Mathf.Abs(c.rt.anchoredPosition.x - centerX))
+                .First();
         }
     }
 
