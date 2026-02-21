@@ -33,8 +33,11 @@ namespace RDEventEditorHelper
             Log($"已读取 source.json: {json.Substring(0, Math.Min(200, json.Length))}...");
 
             var sourceData = JsonConvert.DeserializeObject<SourceData>(json);
-            Log($"事件类型: {sourceData?.eventType}, 属性数量: {sourceData?.properties?.Length ?? 0}");
+            Log($"事件类型: {sourceData?.eventType}, 特征码: {sourceData?.token}, 属性数量: {sourceData?.properties?.Length ?? 0}");
 
+            // 保存特征码，必须在所有响应中回传
+            string sessionToken = sourceData?.token ?? "";
+            
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
@@ -43,24 +46,26 @@ namespace RDEventEditorHelper
 
             editorForm.OnOK += (updates) =>
             {
-                var result = new ResultData { action = "ok", updates = updates };
+                var result = new ResultData { token = sessionToken, action = "ok", updates = updates };
                 string resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
                 File.WriteAllText(ResultPath, resultJson);
-                Log("已写入 result.json (ok)，退出");
+                Log($"已写入 result.json (ok), token: {sessionToken}，退出");
             };
 
             editorForm.OnCancel += () =>
             {
-                File.WriteAllText(ResultPath, "{}");
-                Log("已写入空 result.json (cancel)，退出");
+                var result = new ResultData { token = sessionToken, action = "cancel" };
+                string resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
+                File.WriteAllText(ResultPath, resultJson);
+                Log($"已写入 result.json (cancel), token: {sessionToken}，退出");
             };
 
             editorForm.OnExecute += (methodName) =>
             {
-                var result = new ResultData { action = "execute", methodName = methodName };
+                var result = new ResultData { token = sessionToken, action = "execute", methodName = methodName };
                 string resultJson = JsonConvert.SerializeObject(result, Formatting.Indented);
                 File.WriteAllText(ResultPath, resultJson);
-                Log($"已写入 result.json (execute: {methodName})，退出");
+                Log($"已写入 result.json (execute: {methodName}), token: {sessionToken}，退出");
             };
 
             Log("显示编辑器窗口");
@@ -84,11 +89,13 @@ namespace RDEventEditorHelper
         private class SourceData
         {
             public string eventType;
+            public string token;  // 会话特征码
             public PropertyData[] properties;
         }
 
         private class ResultData
         {
+            public string token;  // 会话特征码（必须回传）
             public string action;
             public System.Collections.Generic.Dictionary<string, string> updates;
             public string methodName;  // 当 action 为 "execute" 时使用

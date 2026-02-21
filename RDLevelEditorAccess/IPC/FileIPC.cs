@@ -23,6 +23,7 @@ namespace RDLevelEditorAccess.IPC
         private string _resultPath;
         private LevelEvent_Base _currentEvent;
         private bool _isPolling;
+        private string _sessionToken;  // 会话特征码
 
         public void Initialize()
         {
@@ -44,6 +45,10 @@ namespace RDLevelEditorAccess.IPC
             if (levelEvent == null) return;
 
             _currentEvent = levelEvent;
+            
+            // 生成新的会话特征码
+            _sessionToken = System.Guid.NewGuid().ToString();
+            Debug.Log($"[FileIPC] 生成会话特征码: {_sessionToken}");
 
             Debug.Log($"[FileIPC] 开始编辑事件: {levelEvent.type}");
 
@@ -52,6 +57,7 @@ namespace RDLevelEditorAccess.IPC
             var sourceData = new SourceData
             {
                 eventType = levelEvent.type.ToString(),
+                token = _sessionToken,
                 properties = properties
             };
 
@@ -126,8 +132,22 @@ namespace RDLevelEditorAccess.IPC
                 try
                 {
                     string json = File.ReadAllText(_resultPath);
-                    File.Delete(_resultPath);
                     Debug.Log($"[FileIPC] 已读取 result.json");
+                    
+                    // 先解析验证特征码
+                    var options = new JsonSerializerOptions { IncludeFields = true };
+                    var resultData = JsonSerializer.Deserialize<ResultData>(json, options);
+                    
+                    // 特征码验证
+                    if (resultData?.token != _sessionToken)
+                    {
+                        Debug.LogWarning($"[FileIPC] 特征码不匹配，期望: {_sessionToken}，实际: {resultData?.token}，删除文件继续轮询");
+                        File.Delete(_resultPath);
+                        return; // 继续轮询，不停止不解锁
+                    }
+                    
+                    Debug.Log($"[FileIPC] 特征码验证通过: {_sessionToken}");
+                    File.Delete(_resultPath);
 
                     ProcessResult(json);
                 }
@@ -135,12 +155,10 @@ namespace RDLevelEditorAccess.IPC
                 {
                     Debug.LogError($"[FileIPC] 读取 result.json 失败: {ex.Message}");
                 }
-                finally
-                {
-                    _isPolling = false;
-
-                    UnlockKeyboard();
-                }
+                
+                // 只有在验证成功或处理完成后才停止轮询和解锁
+                _isPolling = false;
+                UnlockKeyboard();
             }
         }
 
@@ -696,12 +714,14 @@ namespace RDLevelEditorAccess.IPC
         private class SourceData
         {
             public string eventType;
+            public string token;  // 会话特征码
             public List<PropertyData> properties;
         }
 
         [Serializable]
         private class ResultData
         {
+            public string token;  // 会话特征码（必须回传）
             public string action;
             public Dictionary<string, string> updates;
             public string methodName;  // 当 action 为 "execute" 时使用
