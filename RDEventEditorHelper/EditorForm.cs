@@ -485,6 +485,13 @@ namespace RDEventEditorHelper
                         
                         soundPanel.Controls.Add(listView);
                         
+                        // 确保选中状态生效
+                        listView.Refresh();
+                        if (listView.SelectedItems.Count > 0)
+                        {
+                            listView.Focus();
+                        }
+                        
                         // 第三行：音量
                         var lblVolume = new Label { Text = "音量:", Width = 45, Top = 155, Left = 0 };
                         var txtVolume = new TextBox { Text = soundVolume, Width = 60, Top = 153, Left = 45, Name = "Volume" };
@@ -602,6 +609,14 @@ namespace RDEventEditorHelper
                         };
                         
                         charPanel.Controls.Add(charListView);
+                        
+                        // 确保选中状态生效
+                        charListView.Refresh();
+                        if (charListView.SelectedItems.Count > 0)
+                        {
+                            charListView.Focus();
+                        }
+                        
                         inputCtrl = charPanel;
                         break;
 

@@ -652,9 +652,10 @@ namespace RDLevelEditorAccess
                 selectedEventType = eventTypes[virtualMenuIndex];
                 CloseVirtualMenu();
                 
-                // 使用默认值创建事件
-                int bar = editor.startBar + 1;
-                float beat = 1f;
+                // 使用 playhead 精确位置创建事件
+                var barAndBeat = editor.timeline.GetBarAndBeatWithPosX(editor.timeline.playhead.anchoredPosition.x);
+                int bar = barAndBeat.bar;
+                float beat = barAndBeat.beat;
                 int row = editor.selectedRowIndex >= 0 ? editor.selectedRowIndex : 0;
                 
                 CreateEventAndEdit(selectedEventType, bar, beat, row);
