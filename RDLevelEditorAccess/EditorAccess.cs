@@ -1238,4 +1238,52 @@ namespace RDLevelEditorAccess
             }
         }
     }
+
+    // ===================================================================================
+    // 时间轴导航语音反馈
+    // ===================================================================================
+    [HarmonyPatch(typeof(Timeline))]
+    public static class TimelinePatch
+    {
+        [HarmonyPatch("PreviousPage")]
+        [HarmonyPostfix]
+        public static void PreviousPagePostfix(Timeline __instance)
+        {
+            // 只播报当前位置
+            int bar = scnEditor.instance?.startBar + 1 ?? 1;
+            Narration.Say($"{bar}小节 1拍", NarrationCategory.Navigation);
+        }
+
+        [HarmonyPatch("NextPage")]
+        [HarmonyPostfix]
+        public static void NextPagePostfix(Timeline __instance)
+        {
+            // 只播报当前位置
+            int bar = scnEditor.instance?.startBar + 1 ?? 1;
+            Narration.Say($"{bar}小节 1拍", NarrationCategory.Navigation);
+        }
+    }
+
+    [HarmonyPatch(typeof(scnEditor))]
+    public static class TimelineNavigationPatch
+    {
+        [HarmonyPatch("PreviousButtonClick")]
+        [HarmonyPostfix]
+        public static void PreviousButtonClickPostfix(scnEditor __instance)
+        {
+            // 只播报当前位置
+            int bar = __instance.startBar + 1;
+            Narration.Say($"{bar}小节 1拍", NarrationCategory.Navigation);
+        }
+
+        [HarmonyPatch("NextButtonClick")]
+        [HarmonyPostfix]
+        public static void NextButtonClickPostfix(scnEditor __instance)
+        {
+            // 只播报当前位置
+            int bar = __instance.startBar + 1;
+            Narration.Say($"{bar}小节 1拍", NarrationCategory.Navigation);
+        }
+    }
+
 }
