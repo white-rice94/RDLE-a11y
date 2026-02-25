@@ -1211,14 +1211,17 @@ namespace RDLevelEditorAccess
         public static void SelectEventControlPostfix(LevelEventControl_Base newControl)
         {
             if (newControl?.levelEvent == null) return;
-            
+
             var eventType = newControl.levelEvent.type;
-            
+
             // 朗读事件名称
             Narration.Say(ModUtils.eventSelectI18n(newControl.levelEvent), NarrationCategory.Navigation);
-            
+
             // 添加警告消息（针对特定事件类型）
             AddEventWarning(eventType);
+
+            // NEW：自动移动playhead到事件位置
+            MovePlayheadToSelectedEvent();
         }
 
         /// <summary>
@@ -1248,6 +1251,32 @@ namespace RDLevelEditorAccess
                     // 标签操作
                     Narration.Say("（标签操作）", NarrationCategory.Instruction);
                     break;
+            }
+        }
+
+        // NEW：移动playhead到选中事件的位置
+        private static void MovePlayheadToSelectedEvent()
+        {
+            try
+            {
+                var editor = scnEditor.instance;
+                if (editor?.timeline == null) return;
+
+                var selectedControl = editor.selectedControl;
+                if (selectedControl?.levelEvent == null) return;
+
+                // 获取事件的时间位置
+                int eventBar = selectedControl.levelEvent.bar;
+
+                // 使用ScrubToBar完整导航到该bar
+                // playAfterScrubbing = false，因为编辑器通常处于静止状态
+                editor.ScrubToBar(eventBar, playAfterScrubbing: false);
+
+                Debug.Log($"[RDMods] Playhead moved to bar {eventBar} (event: {selectedControl.levelEvent.type})");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[RDMods] Failed to move playhead: {ex.Message}");
             }
         }
 
