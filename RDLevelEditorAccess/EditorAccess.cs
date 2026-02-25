@@ -1267,12 +1267,18 @@ namespace RDLevelEditorAccess
 
                 // 获取事件的时间位置
                 int eventBar = selectedControl.levelEvent.bar;
+                float eventBeat = selectedControl.levelEvent.beat;
 
-                // 使用ScrubToBar完整导航到该bar
-                // playAfterScrubbing = false，因为编辑器通常处于静止状态
-                editor.ScrubToBar(eventBar, playAfterScrubbing: false);
+                // 创建BarAndBeat结构
+                var barAndBeat = new BarAndBeat(eventBar, eventBeat);
 
-                Debug.Log($"[RDMods] Playhead moved to bar {eventBar} (event: {selectedControl.levelEvent.type})");
+                // 转换为playhead的像素X位置
+                float posX = editor.timeline.GetPosXFromBarAndBeat(barAndBeat);
+
+                // 移动playhead到该位置（仅更新UI，不重新加载游戏场景）
+                editor.timeline.MovePlayHead(posX);
+
+                Debug.Log($"[RDMods] Playhead moved to bar {eventBar}, beat {eventBeat} (event: {selectedControl.levelEvent.type})");
             }
             catch (Exception ex)
             {
