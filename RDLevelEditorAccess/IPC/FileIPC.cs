@@ -611,6 +611,23 @@ namespace RDLevelEditorAccess.IPC
                 }
             }
 
+            // ★ 关键：调用SaveState()保存修改到undo/redo栈
+            // 这与游戏原始的SaveAndUpdateUI()行为一致，确保属性修改被永久保存而不是只在内存中
+            if (editor != null)
+            {
+                try
+                {
+                    using (new SaveStateScope())
+                    {
+                        Debug.Log("[FileIPC] 已调用SaveState()持久化轨道属性修改");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[FileIPC] SaveState()调用失败: {ex.Message}");
+                }
+            }
+
             // 更新 UI
             if (editor != null)
             {
@@ -805,6 +822,23 @@ namespace RDLevelEditorAccess.IPC
                 catch (Exception ex)
                 {
                     Debug.LogWarning($"[FileIPC] 属性 {key} 转换失败: {ex.Message}");
+                }
+            }
+
+            // ★ 关键：调用SaveState()保存修改到undo/redo栈
+            // 这与游戏原始的SaveAndUpdateUI()行为一致，确保属性修改被永久保存而不是只在内存中
+            if (scnEditor.instance != null)
+            {
+                try
+                {
+                    using (new SaveStateScope())
+                    {
+                        Debug.Log("[FileIPC] 已调用SaveState()持久化属性修改");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Debug.LogWarning($"[FileIPC] SaveState()调用失败: {ex.Message}");
                 }
             }
 
