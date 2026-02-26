@@ -1380,4 +1380,37 @@ namespace RDLevelEditorAccess
         }
     }
 
+    // 修复：Ctrl+V 粘贴位置改为以播放头为中心
+    [HarmonyPatch(typeof(scnEditor), "Paste")]
+    public static class PastePatch
+    {
+        [HarmonyPrefix]
+        public static void PastePrefix(bool onNextBar)
+        {
+            if (onNextBar) return;
+
+            var editor = scnEditor.instance;
+            if (editor?.timeline == null) return;
+
+            var timeline = editor.timeline;
+            float playheadX = timeline.playhead.anchoredPosition.x;
+            float viewWidth = timeline.scrollview.rect.width;
+            float contentWidth = timeline.scrollviewContent.sizeDelta.x;
+            float scrollableWidth = contentWidth - viewWidth;
+
+            if (scrollableWidth <= 0) return;
+
+            // 杀死现有滚动动画，防止它在下一帧覆盖我们设置的位置
+            var tweenField = typeof(Timeline).GetField("positionXTween",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var tween = tweenField?.GetValue(timeline);
+            tween?.GetType().GetMethod("Kill", new[] { typeof(bool) })?.Invoke(tween, new object[] { false });
+
+            // 同步设置滚动位置，使播放头居中
+            float targetScrollX = playheadX - viewWidth / 2f;
+            float normalizedPos = Mathf.Clamp01(targetScrollX / scrollableWidth);
+            timeline.scrollRect.horizontalNormalizedPosition = normalizedPos;
+        }
+    }
+
 }
