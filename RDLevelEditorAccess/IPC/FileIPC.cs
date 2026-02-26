@@ -503,6 +503,13 @@ namespace RDLevelEditorAccess.IPC
 
                 try
                 {
+                    // ★ 首先尝试应用基础属性（bar, beat, y, row, active, tag, tagRunNormally）
+                    // 这些属性对MakeRow也是适用的（MakeRow继承自LevelEvent_Base）
+                    if (ApplyBaseProperty(row, key, strVal))
+                    {
+                        continue; // 基础属性已处理，跳过
+                    }
+
                     switch (key)
                     {
                         case "rowType":
@@ -608,7 +615,7 @@ namespace RDLevelEditorAccess.IPC
             if (editor != null)
             {
                 editor.tabSection_rows?.UpdateUI();
-                
+
                 // 更新轨道头部显示
                 var inspectorPanel = editor.inspectorPanelManager?.Get<InspectorPanel_MakeRow>();
                 if (inspectorPanel != null && inspectorPanel.currentLevelEvent == row)
