@@ -39,9 +39,9 @@ The game directory is configured in `Directory.Build.props` as `D:\SteamLibrary\
 ```
 RDLevelEditorAccess/
 ├── EditorAccess.cs           # BepInEx plugin entry, Harmony patches, core logic
-├── AccessibilityModule.cs    # Public API (AccessibilityBridge)
+├── AccessibilityModule.cs    # Public API (AccessibilityBridge) + UnityDispatcher
 ├── CustomUINavigator.cs      # Disables native UI navigation
-├── InputFieldReader.cs.cs    # Text-to-speech for input fields
+├── InputFieldReader.cs       # Text-to-speech for input fields
 └── IPC/
     └── FileIPC.cs            # File-based IPC with Helper
 
@@ -85,6 +85,7 @@ The mod and helper communicate via JSON files:
      ]
    }
    ```
+   For row editing, use `"editType": "row"` and `"eventType": "MakeRow"`.
 
 2. **Mod launches** `RDEventEditorHelper.exe`
 
@@ -98,6 +99,42 @@ The mod and helper communicate via JSON files:
 5. **Mod polls** for result, applies changes, deletes result file
 
 The `token` field is used to match responses to requests and prevent race conditions.
+
+### AccessibilityBridge (Public API)
+
+`AccessibilityBridge` in `AccessibilityModule.cs` is the entry point — do NOT call `FileIPC` directly:
+
+```csharp
+AccessibilityBridge.EditEvent(levelEvent);   // Open event property editor
+AccessibilityBridge.EditRow(rowIndex);       // Open row property editor
+AccessibilityBridge.Update();                // Called every frame from AccessLogic.Update()
+```
+
+### VirtualMenuState
+
+`AccessLogic` maintains a virtual menu system for keyboard-accessible selection dialogs:
+
+```csharp
+private enum VirtualMenuState
+{
+    None,
+    CharacterSelect,   // Adding row/sprite
+    EventTypeSelect    // Selecting event type
+}
+```
+
+When `virtualMenuState != None`, arrow keys navigate the virtual menu instead of the timeline.
+
+### SaveState Pattern
+
+When modifying event or row properties programmatically, always call `SaveState` first to enable undo:
+
+```csharp
+scnEditor.instance.SaveState("修改属性");
+levelEvent.someProperty = newValue;
+```
+
+Without `SaveState`, changes are not persisted to the level file.
 
 ### Unity + BepInEx Pattern
 

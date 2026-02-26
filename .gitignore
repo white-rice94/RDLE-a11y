@@ -364,3 +364,7 @@ FodyWeavers.xsd
 
 # 游戏反编译代码（仅供 AI 参考）
 agents references/
+
+# Claude Code 临时工作目录文件
+tmpclaude-*-cwd
+RDLevelEditorAccess/IPC/tmpclaude-*-cwd
