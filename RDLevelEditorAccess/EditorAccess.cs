@@ -1454,37 +1454,112 @@ namespace RDLevelEditorAccess
         }
     }
 
-    // 修复：粘贴位置基于编辑光标
-    [HarmonyPatch(typeof(scnEditor), "Paste")]
+    // 修复：粘贴位置基于编辑光标（Prefix 中直接实现并拦截原方法，彻底绕过视口计算）
+    // 原方法 Paste(false) 从视口中点计算 barAndBeat，无法精确对齐到编辑光标；
+    // 此处复制原方法逻辑，仅将 barAndBeat 替换为 _editCursor，onNextBar=true 时仍交由原方法处理。
+    [HarmonyPatch(typeof(scnEditor), "Paste", new[] { typeof(bool) })]
     public static class PastePatch
     {
+        private static readonly System.Reflection.MethodInfo _hideMenuDropdown =
+            typeof(scnEditor).GetMethod("HideMenuDropdown",
+                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+
+        // LevelEditorPlaySound 返回 AudioSource（UnityEngine.AudioModule），
+        // 该程序集未被直接引用，用反射调用以避免 CS0012
+        private static readonly System.Reflection.MethodInfo _levelEditorPlaySound =
+            typeof(scnEditor).GetMethod("LevelEditorPlaySound",
+                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance,
+                null,
+                new[] { typeof(string), typeof(string), typeof(float), typeof(float), typeof(float) },
+                null);
+
         [HarmonyPrefix]
-        public static void PastePrefix(bool onNextBar)
+        public static bool PastePrefix(scnEditor __instance, bool onNextBar)
         {
-            if (onNextBar) return;
-            if (AccessLogic.Instance == null) return;
+            if (onNextBar) return true;
+            if (AccessLogic.Instance == null) return true;
 
-            var editor = scnEditor.instance;
-            if (editor?.timeline == null) return;
+            // --- 以下逻辑直接复制自游戏 Paste(false)，仅修改 barAndBeat 来源 ---
 
-            var timeline = editor.timeline;
-            float cursorX = timeline.GetPosXFromBarAndBeat(AccessLogic.Instance._editCursor);
-            float viewWidth = timeline.scrollview.rect.width;
+            _hideMenuDropdown?.Invoke(__instance, null);
 
-            // 直接逆推游戏的粘贴位置公式：
-            //   游戏读：posX = -anchoredPosition.x + viewWidth/2
-            //   令 posX = cursorX → anchoredPosition.x = viewWidth/2 - cursorX
-            // 跳过 horizontalNormalizedPosition 避免 sizeDelta/锚点引入的误差
-            float targetAnchorX = viewWidth / 2f - cursorX;
-            float scrollableWidth = timeline.scrollviewContent.rect.width - viewWidth;
-            if (scrollableWidth > 0f)
-                targetAnchorX = Mathf.Clamp(targetAnchorX, -scrollableWidth, 0f);
-            else
-                targetAnchorX = 0f;
+            if (__instance.clipboard.Count == 0)
+            {
+                __instance.printe("nothing to paste.");
+                _levelEditorPlaySound?.Invoke(__instance, new object[] { "sndEditorErrorSmall", "LevelEditorActive", 1f, 1f, 0f });
+                return false;
+            }
 
-            var anchorPos = timeline.scrollviewContent.anchoredPosition;
-            anchorPos.x = targetAnchorX;
-            timeline.scrollviewContent.anchoredPosition = anchorPos;
+            string sound = __instance.clipboard.Count > 1
+                ? "sndEditorEventCreateMultiple"
+                : "sndEditorEventCreate";
+            _levelEditorPlaySound?.Invoke(__instance, new object[] { sound, "LevelEditorActive", 1f, 1f, 0f });
+
+            // 找到 clipboard 中 sortOrder 最小的事件，作为 bar 偏移基准
+            LevelEvent_Base levelEvent_Base = __instance.clipboard[0];
+            foreach (LevelEvent_Base item in __instance.clipboard)
+            {
+                if (item.sortOrder < levelEvent_Base.sortOrder)
+                    levelEvent_Base = item;
+            }
+
+            // 关键改动：直接使用编辑光标，完全跳过视口中点计算
+            BarAndBeat barAndBeat = AccessLogic.Instance._editCursor;
+
+            bool sameRow = false;    // clipboard 中是否有事件属于 lastUsedRow
+            bool sameSprite = false; // clipboard 中是否有事件属于 lastUsedSprite
+            foreach (LevelEvent_Base item in __instance.clipboard)
+            {
+                if (item.row == __instance.lastUsedRow) sameRow = true;
+                if (item.target == __instance.lastUsedSprite) sameSprite = true;
+            }
+
+            __instance.lastUsedRow = Math.Min(__instance.lastUsedRow, __instance.rowsData.Count - 1);
+
+            using (new SaveStateScope())
+            {
+                List<LevelEvent_Base> clipboardEventsCloned;
+                List<LevelEventControl_Base> list = __instance.PasteFloatingAndAdvanceTextEvents(
+                    __instance.clipboard, out clipboardEventsCloned, cloneEvents: true);
+
+                foreach (LevelEvent_Base item in __instance.clipboard)
+                {
+                    if (clipboardEventsCloned.Contains(item)) continue;
+
+                    if (item.isClassicRowEvent || item.isOneshotRowEvent)
+                    {
+                        if (__instance.lastUsedRow != -10 && !sameRow)
+                            item.row = __instance.lastUsedRow;
+                        if (item.row >= __instance.rowsData.Count) continue;
+
+                        LevelEvent_MakeRow makeRow = __instance.rowsData[item.row];
+                        if (makeRow.rowType == RowType.Oneshot && item.isClassicRowEvent) continue;
+                        if (makeRow.rowType == RowType.Classic && item.isOneshotRowEvent) continue;
+                    }
+
+                    if (item.isSpriteTabEvent &&
+                        SpriteHeader.GetSpriteData(__instance.lastUsedSprite) != null &&
+                        !sameSprite)
+                    {
+                        item.target = __instance.lastUsedSprite;
+                    }
+
+                    LevelEvent_Base clone = item.Clone();
+                    item.GenerateNewUID();
+                    LevelEventControl_Base ctrl = __instance.CreateEventControl(clone, item.defaultTab);
+                    list.Add(ctrl);
+                }
+
+                foreach (LevelEventControl_Base ctrl in list)
+                {
+                    ctrl.bar = ctrl.bar - levelEvent_Base.bar + barAndBeat.bar;
+                    ctrl.UpdateUI();
+                }
+
+                __instance.SelectEventControls(list);
+            }
+
+            return false; // 拦截原方法
         }
     }
 
