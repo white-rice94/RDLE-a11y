@@ -1454,7 +1454,7 @@ namespace RDLevelEditorAccess
         }
     }
 
-    // 修复：Ctrl+V 粘贴位置改为以播放头为中心
+    // 修复：粘贴位置基于编辑光标
     [HarmonyPatch(typeof(scnEditor), "Paste")]
     public static class PastePatch
     {
@@ -1462,28 +1462,29 @@ namespace RDLevelEditorAccess
         public static void PastePrefix(bool onNextBar)
         {
             if (onNextBar) return;
+            if (AccessLogic.Instance == null) return;
 
             var editor = scnEditor.instance;
             if (editor?.timeline == null) return;
 
             var timeline = editor.timeline;
-            float playheadX = timeline.GetPosXFromBarAndBeat(AccessLogic.Instance._editCursor);
+            float cursorX = timeline.GetPosXFromBarAndBeat(AccessLogic.Instance._editCursor);
             float viewWidth = timeline.scrollview.rect.width;
-            float contentWidth = timeline.scrollviewContent.sizeDelta.x;
-            float scrollableWidth = contentWidth - viewWidth;
 
-            if (scrollableWidth <= 0) return;
+            // 直接逆推游戏的粘贴位置公式：
+            //   游戏读：posX = -anchoredPosition.x + viewWidth/2
+            //   令 posX = cursorX → anchoredPosition.x = viewWidth/2 - cursorX
+            // 跳过 horizontalNormalizedPosition 避免 sizeDelta/锚点引入的误差
+            float targetAnchorX = viewWidth / 2f - cursorX;
+            float scrollableWidth = timeline.scrollviewContent.rect.width - viewWidth;
+            if (scrollableWidth > 0f)
+                targetAnchorX = Mathf.Clamp(targetAnchorX, -scrollableWidth, 0f);
+            else
+                targetAnchorX = 0f;
 
-            // 杀死现有滚动动画，防止它在下一帧覆盖我们设置的位置
-            var tweenField = typeof(Timeline).GetField("positionXTween",
-                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            var tween = tweenField?.GetValue(timeline);
-            tween?.GetType().GetMethod("Kill", new[] { typeof(bool) })?.Invoke(tween, new object[] { false });
-
-            // 同步设置滚动位置，使播放头居中
-            float targetScrollX = playheadX - viewWidth / 2f;
-            float normalizedPos = Mathf.Clamp01(targetScrollX / scrollableWidth);
-            timeline.scrollRect.horizontalNormalizedPosition = normalizedPos;
+            var anchorPos = timeline.scrollviewContent.anchoredPosition;
+            anchorPos.x = targetAnchorX;
+            timeline.scrollviewContent.anchoredPosition = anchorPos;
         }
     }
 
