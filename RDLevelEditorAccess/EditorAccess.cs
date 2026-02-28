@@ -1359,7 +1359,7 @@ namespace RDLevelEditorAccess
         private static void AddEventWarning(LevelEvent_Base levelEvent)
         {
             var bb = new BarAndBeat(levelEvent.bar, levelEvent.beat);
-            Narration.Say(ModUtils.FormatBarAndBeat(bb), NarrationCategory.Navigation);
+            Narration.Say(ModUtils.FormatBarAndBeat(bb), NarrationCategory.Instruction);
         }
 
         // NEW：移动playhead到选中事件的位置
