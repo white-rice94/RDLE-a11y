@@ -1247,12 +1247,29 @@ namespace RDLevelEditorAccess.IPC
             var settings = scnEditor.instance.levelSettings;
             var list = new List<PropertyData>();
 
+            // 基本信息
             list.Add(new PropertyData { name = "song",        displayName = RDString.Get("eam.settings.song"),        value = settings.song        ?? "", type = "String" });
             list.Add(new PropertyData { name = "artist",      displayName = RDString.Get("eam.settings.artist"),      value = settings.artist      ?? "", type = "String" });
             list.Add(new PropertyData { name = "author",      displayName = RDString.Get("eam.settings.author"),      value = settings.author      ?? "", type = "String" });
             list.Add(new PropertyData { name = "description", displayName = RDString.Get("eam.settings.description"), value = settings.description ?? "", type = "String" });
             list.Add(new PropertyData { name = "tags",        displayName = RDString.Get("eam.settings.tags"),        value = settings.tags        ?? "", type = "String" });
 
+            // 艺术家授权
+            var satNames = Enum.GetNames(typeof(SpecialArtistType));
+            list.Add(new PropertyData
+            {
+                name = "specialArtistType", displayName = RDString.Get("eam.settings.specialArtistType"),
+                value = settings.specialArtistType.ToString(), type = "Enum",
+                options = satNames,
+                localizedOptions = satNames.Select(n => {
+                    string loc = RDString.GetWithCheck($"enum.SpecialArtistType.{n}", out bool ok);
+                    return ok ? StripRichTextTags(loc) : n;
+                }).ToArray()
+            });
+            list.Add(new PropertyData { name = "artistPermissionFileName", displayName = RDString.Get("eam.settings.artistPermission"), value = settings.artistPermissionFileName ?? "", type = "String" });
+            list.Add(new PropertyData { name = "artistLinks",              displayName = RDString.Get("eam.settings.artistLinks"),       value = settings.artistLinks              ?? "", type = "String" });
+
+            // 难度与警告
             var diffNames = Enum.GetNames(typeof(LevelDifficulty));
             list.Add(new PropertyData
             {
@@ -1264,9 +1281,9 @@ namespace RDLevelEditorAccess.IPC
                     return ok ? StripRichTextTags(loc) : n;
                 }).ToArray()
             });
-
             list.Add(new PropertyData { name = "seizureWarning", displayName = RDString.Get("eam.settings.seizureWarning"), value = settings.seizureWarning.ToString().ToLower(), type = "Bool" });
 
+            // 游戏模式
             var modeNames = Enum.GetNames(typeof(LevelPlayMode));
             list.Add(new PropertyData
             {
@@ -1278,6 +1295,43 @@ namespace RDLevelEditorAccess.IPC
                     return ok ? StripRichTextTags(loc) : n;
                 }).ToArray()
             });
+            var maNames = Enum.GetNames(typeof(MultiplayerAppearance));
+            list.Add(new PropertyData
+            {
+                name = "multiplayerAppearance", displayName = RDString.Get("eam.settings.multiplayerAppearance"),
+                value = settings.multiplayerAppearance.ToString(), type = "Enum",
+                options = maNames,
+                localizedOptions = maNames.Select(n => {
+                    string loc = RDString.GetWithCheck($"enum.MultiplayerAppearance.{n}", out bool ok);
+                    return ok ? StripRichTextTags(loc) : n;
+                }).ToArray()
+            });
+
+            // 预览资源
+            list.Add(new PropertyData { name = "previewImageName",     displayName = RDString.Get("eam.settings.previewImage"),         value = settings.previewImageName     ?? "", type = "String" });
+            list.Add(new PropertyData { name = "syringeIconName",      displayName = RDString.Get("eam.settings.syringeIcon"),          value = settings.syringeIconName      ?? "", type = "String" });
+            list.Add(new PropertyData { name = "previewSongName",      displayName = RDString.Get("eam.settings.previewSong"),          value = settings.previewSongName      ?? "", type = "String" });
+            list.Add(new PropertyData { name = "previewSongStartTime", displayName = RDString.Get("eam.settings.previewSongStartTime"), value = settings.previewSongStartTime.ToString(), type = "Float" });
+            list.Add(new PropertyData { name = "previewSongDuration",  displayName = RDString.Get("eam.settings.previewSongDuration"),  value = settings.previewSongDuration.ToString(),  type = "Float" });
+
+            // 外观
+            list.Add(new PropertyData { name = "songLabelHue",       displayName = RDString.Get("eam.settings.songLabelHue"),       value = settings.songLabelHue.ToString(),                   type = "Float" });
+            list.Add(new PropertyData { name = "songLabelGrayscale", displayName = RDString.Get("eam.settings.songLabelGrayscale"), value = settings.songLabelGrayscale.ToString().ToLower(),   type = "Bool" });
+            list.Add(new PropertyData { name = "levelVolume",        displayName = RDString.Get("eam.settings.levelVolume"),        value = settings.levelVolume.ToString(),                    type = "Float" });
+
+            // 高级
+            var fbbNames = Enum.GetNames(typeof(FirstBeatBehavior));
+            list.Add(new PropertyData
+            {
+                name = "firstBeatBehavior", displayName = RDString.Get("eam.settings.firstBeatBehavior"),
+                value = settings.firstBeatBehavior.ToString(), type = "Enum",
+                options = fbbNames,
+                localizedOptions = fbbNames.Select(n => {
+                    string loc = RDString.GetWithCheck($"enum.FirstBeatBehavior.{n}", out bool ok);
+                    return ok ? StripRichTextTags(loc) : n;
+                }).ToArray()
+            });
+            list.Add(new PropertyData { name = "separate2PLevelFilename", displayName = RDString.Get("eam.settings.separate2PLevel"), value = settings.separate2PLevelFilename ?? "", type = "String" });
 
             return list;
         }
@@ -1322,14 +1376,28 @@ namespace RDLevelEditorAccess.IPC
                 {
                     switch (kv.Key)
                     {
-                        case "song":           s.song           = kv.Value; break;
-                        case "artist":         s.artist         = kv.Value; break;
-                        case "author":         s.author         = kv.Value; break;
-                        case "description":    s.description    = kv.Value; break;
-                        case "tags":           s.tags           = kv.Value; break;
-                        case "difficulty":     s.difficulty     = (LevelDifficulty)Enum.Parse(typeof(LevelDifficulty), kv.Value); break;
-                        case "seizureWarning": s.seizureWarning = kv.Value == "true"; break;
-                        case "canBePlayedOn":  s.canBePlayedOn  = (LevelPlayMode)Enum.Parse(typeof(LevelPlayMode), kv.Value); break;
+                        case "song":                    s.song                    = kv.Value; break;
+                        case "artist":                  s.artist                  = kv.Value; break;
+                        case "author":                  s.author                  = kv.Value; break;
+                        case "description":             s.description             = kv.Value; break;
+                        case "tags":                    s.tags                    = kv.Value; break;
+                        case "artistPermissionFileName":s.artistPermissionFileName = kv.Value; break;
+                        case "artistLinks":             s.artistLinks             = kv.Value; break;
+                        case "previewImageName":        s.previewImageName        = kv.Value; break;
+                        case "syringeIconName":         s.syringeIconName         = kv.Value; break;
+                        case "previewSongName":         s.previewSongName         = kv.Value; break;
+                        case "separate2PLevelFilename": s.separate2PLevelFilename = kv.Value; break;
+                        case "difficulty":              s.difficulty              = (LevelDifficulty)Enum.Parse(typeof(LevelDifficulty), kv.Value); break;
+                        case "specialArtistType":       s.specialArtistType       = (SpecialArtistType)Enum.Parse(typeof(SpecialArtistType), kv.Value); break;
+                        case "canBePlayedOn":           s.canBePlayedOn           = (LevelPlayMode)Enum.Parse(typeof(LevelPlayMode), kv.Value); break;
+                        case "multiplayerAppearance":   s.multiplayerAppearance   = (MultiplayerAppearance)Enum.Parse(typeof(MultiplayerAppearance), kv.Value); break;
+                        case "firstBeatBehavior":       s.firstBeatBehavior       = (FirstBeatBehavior)Enum.Parse(typeof(FirstBeatBehavior), kv.Value); break;
+                        case "seizureWarning":          s.seizureWarning          = kv.Value == "true"; break;
+                        case "songLabelGrayscale":      s.songLabelGrayscale      = kv.Value == "true"; break;
+                        case "previewSongStartTime":    if (float.TryParse(kv.Value, out float pst)) s.previewSongStartTime = pst; break;
+                        case "previewSongDuration":     if (float.TryParse(kv.Value, out float psd)) s.previewSongDuration  = psd; break;
+                        case "songLabelHue":            if (float.TryParse(kv.Value, out float slh)) s.songLabelHue         = slh; break;
+                        case "levelVolume":             if (float.TryParse(kv.Value, out float lv))  s.levelVolume          = lv;  break;
                     }
                 }
                 editor.levelSettings = s;
