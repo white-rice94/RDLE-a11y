@@ -431,7 +431,7 @@ namespace RDLevelEditorAccess
                 if (editor.selectedControl != null)
                 {
                     AccessibilityBridge.EditEvent(editor.selectedControl.levelEvent);
-                    Narration.Say(RDString.Get("eam.editor.openPropEditor"), NarrationCategory.Instruction);
+                    Narration.Say(RDString.Get("eam.editor.openPropEditor"), NarrationCategory.Instruction);// 过于冗余，去掉。
                 }
             }
 
@@ -442,7 +442,7 @@ namespace RDLevelEditorAccess
                 if (editor.currentTab == Tab.Rows && editor.selectedRowIndex >= 0)
                 {
                     AccessibilityBridge.EditRow(editor.selectedRowIndex);
-                    Narration.Say(RDString.Get("eam.editor.openTrackEditor"), NarrationCategory.Instruction);
+                    //Narration.Say(RDString.Get("eam.editor.openTrackEditor"), NarrationCategory.Instruction);// 过于冗余，去掉。
                 }
                 else if (editor.currentTab == Tab.Sprites && !string.IsNullOrEmpty(editor.selectedSprite))
                 {
@@ -784,19 +784,9 @@ namespace RDLevelEditorAccess
         /// <summary>
         /// 将 BarAndBeat 格式化为本地化字符串（如"3小节2拍"或"Bar 3 Beat 2"）。
         /// </summary>
-        private static string FormatBarAndBeat(BarAndBeat bb)
-        {
-            return string.Format(RDString.Get("eam.barbeat.format"), bb.bar, FormatBeat(bb.beat));
-        }
+        private static string FormatBarAndBeat(BarAndBeat bb) => ModUtils.FormatBarAndBeat(bb);
 
-        /// <summary>
-        /// 将拍号格式化，取整到1位小数并去除尾零，不含单位（如"2"或"2.5"）。
-        /// </summary>
-        internal static string FormatBeat(float beat)
-        {
-            float rounded = Mathf.Round(beat * 10f) / 10f;
-            return rounded % 1f == 0f ? $"{(int)rounded}" : $"{rounded:0.#}";
-        }
+        internal static string FormatBeat(float beat) => ModUtils.FormatBeat(beat);
 
         /// <summary>
         /// 将拍号格式化为带本地化单位的完整字符串（如"2拍"或"Beat 2"）。
@@ -1329,6 +1319,17 @@ namespace RDLevelEditorAccess
         {
             return eventNameI18n(ev);
         }
+
+        public static string FormatBarAndBeat(BarAndBeat bb)
+        {
+            return string.Format(RDString.Get("eam.barbeat.format"), bb.bar, FormatBeat(bb.beat));
+        }
+
+        public static string FormatBeat(float beat)
+        {
+            float rounded = Mathf.Round(beat * 10f) / 10f;
+            return rounded % 1f == 0f ? $"{(int)rounded}" : $"{rounded:0.#}";
+        }
     }
 
     [HarmonyPatch(typeof(scnEditor))]
@@ -1345,41 +1346,20 @@ namespace RDLevelEditorAccess
             // 朗读事件名称
             Narration.Say(ModUtils.eventSelectI18n(newControl.levelEvent), NarrationCategory.Navigation);
 
-            // 添加警告消息（针对特定事件类型）
-            AddEventWarning(eventType);
+            // 添加警告消息（朗读事件位置）
+            AddEventWarning(newControl.levelEvent);
 
             // NEW：自动移动playhead到事件位置
             MovePlayheadToSelectedEvent();
         }
 
         /// <summary>
-        /// 为特定事件类型添加警告消息
+        /// 朗读事件位置。
         /// </summary>
-        private static void AddEventWarning(LevelEventType eventType)
+        private static void AddEventWarning(LevelEvent_Base levelEvent)
         {
-            // 这些事件可能需要特殊处理或用户注意
-            switch (eventType)
-            {
-                case LevelEventType.Comment:
-                    // 评论事件不直接影响游戏，只读
-                    Narration.Say(RDString.Get("eam.event.commentNote"), NarrationCategory.Instruction);
-                    break;
-                    
-                case LevelEventType.FinishLevel:
-                    // 结束关卡事件
-                    Narration.Say(RDString.Get("eam.event.levelEndNote"), NarrationCategory.Instruction);
-                    break;
-                    
-                case LevelEventType.CallCustomMethod:
-                    // 自定义方法需要额外配置
-                    Narration.Say(RDString.Get("eam.event.customMethodNote"), NarrationCategory.Instruction);
-                    break;
-                    
-                case LevelEventType.TagAction:
-                    // 标签操作
-                    Narration.Say(RDString.Get("eam.event.tagNote"), NarrationCategory.Instruction);
-                    break;
-            }
+            var bb = new BarAndBeat(levelEvent.bar, levelEvent.beat);
+            Narration.Say(ModUtils.FormatBarAndBeat(bb), NarrationCategory.Navigation);
         }
 
         // NEW：移动playhead到选中事件的位置
@@ -1656,11 +1636,11 @@ namespace RDLevelEditorAccess
             ["eam.event.createFailed"]           = "无法创建事件类型 {0}",
             ["eam.event.createError"]            = "创建事件失败",
             ["eam.event.createdAndOpening"]      = "已创建事件 {0}，正在打开属性编辑器",
-            ["eam.track.noAvailable"]            = "无可用轨道",
-            ["eam.sprite.noAvailable"]           = "无可用精灵",
+            ["eam.track.noAvailable"]            = "无轨道",
+            ["eam.sprite.noAvailable"]           = "无精灵",
             ["eam.track.info"]                   = "轨道 {0} {1} {2}事件",
             ["eam.sprite.info"]                  = "精灵 {0} {1} {2}事件",
-            ["eam.event.noAvailable"]            = "无可用事件",
+            ["eam.event.noAvailable"]            = "无事件",
             ["eam.event.commentNote"]            = "（注释事件）",
             ["eam.event.levelEndNote"]           = "（结束关卡）",
             ["eam.event.customMethodNote"]       = "（需要配置自定义方法）",
