@@ -368,3 +368,6 @@ agents references/
 # Claude Code 临时工作目录文件
 tmpclaude-*-cwd
 RDLevelEditorAccess/IPC/tmpclaude-*-cwd
+
+# Claude Code 项目数据目录
+.claude/

@@ -555,25 +555,25 @@ namespace RDLevelEditorAccess
             }
 
             // ===================================================================================
-            // 快速移动事件（小键盘）
+            // 快速移动事件（Z/C/X 键）
             // ===================================================================================
 
-            // 小键盘4：选中事件后退（Shift: 0.1拍，无修饰: 1拍）
-            if (Input.GetKeyDown(KeyCode.Keypad4))
+            // Z键：选中事件后退（Shift: 0.1拍，无修饰: 1拍）
+            if (Input.GetKeyDown(KeyCode.Z))
             {
                 bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                 MoveSelectedEvents(shift ? -0.1f : -1f);
             }
 
-            // 小键盘6：选中事件前进（Shift: 0.1拍，无修饰: 1拍）
-            if (Input.GetKeyDown(KeyCode.Keypad6))
+            // X键：选中事件前进（Shift: 0.1拍，无修饰: 1拍）
+            if (Input.GetKeyDown(KeyCode.X))
             {
                 bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                 MoveSelectedEvents(shift ? 0.1f : 1f);
             }
 
-            // 小键盘5：选中事件吸附到最近的正拍或半拍
-            if (Input.GetKeyDown(KeyCode.Keypad5))
+            // C键：选中事件吸附到最近的正拍或半拍
+            if (Input.GetKeyDown(KeyCode.C))
             {
                 SnapSelectedEventsToHalfBeat();
             }
@@ -837,6 +837,9 @@ namespace RDLevelEditorAccess
             }
 
             var first = editor.selectedControls[0];
+            // 更新 inspector 面板以持久化更改（防止取消选择时回退）
+            editor.inspectorPanelManager.GetCurrent()?.UpdateUI(first.levelEvent);
+
             string announcement = first.bar != oldBar
                 ? FormatBarAndBeat(first.levelEvent.barAndBeat)
                 : FormatBeatOnly(first.beat);
@@ -875,6 +878,9 @@ namespace RDLevelEditorAccess
             }
 
             var first = editor.selectedControls[0];
+            // 更新 inspector 面板以持久化更改（防止取消选择时回退）
+            editor.inspectorPanelManager.GetCurrent()?.UpdateUI(first.levelEvent);
+
             Narration.Say(RDString.Get("eam.cursor.snapPrefix") + FormatBarAndBeat(first.levelEvent.barAndBeat), NarrationCategory.Navigation);
         }
 

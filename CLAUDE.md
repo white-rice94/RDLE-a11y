@@ -41,7 +41,7 @@ RDLevelEditorAccess/
 ├── EditorAccess.cs           # BepInEx plugin entry, Harmony patches, core logic
 ├── AccessibilityModule.cs    # Public API (AccessibilityBridge) + UnityDispatcher
 ├── CustomUINavigator.cs      # Disables native UI navigation
-├── InputFieldReader.cs       # Text-to-speech for input fields
+├── InputFieldReader.cs.cs    # Text-to-speech for input fields
 └── IPC/
     └── FileIPC.cs            # File-based IPC with Helper
 
@@ -86,6 +86,7 @@ The mod and helper communicate via JSON files:
    }
    ```
    For row editing, use `"editType": "row"` and `"eventType": "MakeRow"`.
+   For level settings editing, use `"editType": "settings"`.
 
 2. **Mod launches** `RDEventEditorHelper.exe`
 
@@ -105,6 +106,7 @@ The `token` field is used to match responses to requests and prevent race condit
 `AccessibilityBridge` in `AccessibilityModule.cs` is the entry point — do NOT call `FileIPC` directly:
 
 ```csharp
+AccessibilityBridge.Initialize(gameObject);  // Call once on startup (from AccessLogic.Awake)
 AccessibilityBridge.EditEvent(levelEvent);   // Open event property editor
 AccessibilityBridge.EditRow(rowIndex);       // Open row property editor
 AccessibilityBridge.Update();                // Called every frame from AccessLogic.Update()
