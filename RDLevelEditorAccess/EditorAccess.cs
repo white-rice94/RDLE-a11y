@@ -553,6 +553,30 @@ namespace RDLevelEditorAccess
                 bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
                 MoveEditCursor(shift ? 0.1f : 1f);
             }
+
+            // ===================================================================================
+            // 快速移动事件（小键盘）
+            // ===================================================================================
+
+            // 小键盘4：选中事件后退（Shift: 0.1拍，无修饰: 1拍）
+            if (Input.GetKeyDown(KeyCode.Keypad4))
+            {
+                bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                MoveSelectedEvents(shift ? -0.1f : -1f);
+            }
+
+            // 小键盘6：选中事件前进（Shift: 0.1拍，无修饰: 1拍）
+            if (Input.GetKeyDown(KeyCode.Keypad6))
+            {
+                bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                MoveSelectedEvents(shift ? 0.1f : 1f);
+            }
+
+            // 小键盘5：选中事件吸附到最近的正拍或半拍
+            if (Input.GetKeyDown(KeyCode.Keypad5))
+            {
+                SnapSelectedEventsToHalfBeat();
+            }
         }
 
         /// <summary>
@@ -779,6 +803,79 @@ namespace RDLevelEditorAccess
                 ? FormatBarAndBeat(_editCursor)
                 : FormatBeatOnly(_editCursor.beat);
             Narration.Say(announcement, NarrationCategory.Navigation);
+        }
+
+        /// <summary>
+        /// 将所有选中事件在时间轴上移动 deltaBeat 拍（正数向右，负数向左）。
+        /// 使用像素空间运算以自动处理变速小节（SetCrotchetsPerBar）。
+        /// </summary>
+        private void MoveSelectedEvents(float deltaBeat)
+        {
+            var editor = scnEditor.instance;
+            if (editor?.timeline == null) return;
+            if (editor.selectedControls == null || editor.selectedControls.Count == 0)
+            {
+                Narration.Say(RDString.Get("eam.event.noSelection"), NarrationCategory.Navigation);
+                return;
+            }
+
+            var tl = editor.timeline;
+            int oldBar = editor.selectedControls[0].bar;
+
+            using (new SaveStateScope())
+            {
+                foreach (var control in editor.selectedControls)
+                {
+                    float posX = tl.GetPosXFromBarAndBeat(control.levelEvent.barAndBeat);
+                    float newX = Mathf.Max(0f, posX + deltaBeat * tl.cellWidth);
+                    var newPos = tl.GetBarAndBeatWithPosX(newX);
+                    control.bar = newPos.bar;
+                    control.beat = newPos.beat;
+                    control.UpdateUI();
+                }
+                tl.UpdateUI();
+            }
+
+            var first = editor.selectedControls[0];
+            string announcement = first.bar != oldBar
+                ? FormatBarAndBeat(first.levelEvent.barAndBeat)
+                : FormatBeatOnly(first.beat);
+            Narration.Say(announcement, NarrationCategory.Navigation);
+        }
+
+        /// <summary>
+        /// 将所有选中事件吸附到最近的正拍或半拍（0.5 拍间隔）。
+        /// 使用像素空间运算以自动处理变速小节。
+        /// </summary>
+        private void SnapSelectedEventsToHalfBeat()
+        {
+            var editor = scnEditor.instance;
+            if (editor?.timeline == null) return;
+            if (editor.selectedControls == null || editor.selectedControls.Count == 0)
+            {
+                Narration.Say(RDString.Get("eam.event.noSelection"), NarrationCategory.Navigation);
+                return;
+            }
+
+            var tl = editor.timeline;
+            float halfBeat = tl.cellWidth * 0.5f;
+
+            using (new SaveStateScope())
+            {
+                foreach (var control in editor.selectedControls)
+                {
+                    float posX = tl.GetPosXFromBarAndBeat(control.levelEvent.barAndBeat);
+                    float snappedX = Mathf.Max(0f, Mathf.Round(posX / halfBeat) * halfBeat);
+                    var newPos = tl.GetBarAndBeatWithPosX(snappedX);
+                    control.bar = newPos.bar;
+                    control.beat = newPos.beat;
+                    control.UpdateUI();
+                }
+                tl.UpdateUI();
+            }
+
+            var first = editor.selectedControls[0];
+            Narration.Say(RDString.Get("eam.cursor.snapPrefix") + FormatBarAndBeat(first.levelEvent.barAndBeat), NarrationCategory.Navigation);
         }
 
         /// <summary>
@@ -1641,6 +1738,7 @@ namespace RDLevelEditorAccess
             ["eam.track.info"]                   = "轨道 {0} {1} {2}事件",
             ["eam.sprite.info"]                  = "精灵 {0} {1} {2}事件",
             ["eam.event.noAvailable"]            = "无事件",
+            ["eam.event.noSelection"]            = "未选中任何事件",
             ["eam.event.commentNote"]            = "（注释事件）",
             ["eam.event.levelEndNote"]           = "（结束关卡）",
             ["eam.event.customMethodNote"]       = "（需要配置自定义方法）",
@@ -1713,6 +1811,7 @@ namespace RDLevelEditorAccess
             ["eam.track.info"]                   = "Track {0} {1} {2} events",
             ["eam.sprite.info"]                  = "Sprite {0} {1} {2} events",
             ["eam.event.noAvailable"]            = "No events available",
+            ["eam.event.noSelection"]            = "No events selected",
             ["eam.event.commentNote"]            = "(Comment event)",
             ["eam.event.levelEndNote"]           = "(Level end)",
             ["eam.event.customMethodNote"]       = "(Requires custom method)",
