@@ -1049,7 +1049,7 @@ namespace RDLevelEditorAccess.IPC
                     {
                         string localized = RDString.GetWithCheck(
                             $"enum.{enumProp.enumType.Name}.{name}", out bool exists);
-                        return exists ? localized : name;
+                        return exists ? StripRichTextTags(localized) : name;
                     }).ToArray();
                 }
                 else if (prop is ColorPropertyInfo) dto.type = "Color";
