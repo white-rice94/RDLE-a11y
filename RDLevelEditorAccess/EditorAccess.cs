@@ -495,7 +495,8 @@ namespace RDLevelEditorAccess
 
             // 斜杠：将编辑光标设置为当前播放头位置
             if (Input.GetKeyDown(KeyCode.Slash) &&
-                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
             {
                 var tl = editor.timeline;
                 _editCursor = tl.GetBarAndBeatWithPosX(tl.playhead.anchoredPosition.x);
@@ -507,6 +508,14 @@ namespace RDLevelEditorAccess
                 (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
             {
                 Narration.Say(FormatBarAndBeat(_editCursor) + " 编辑光标", NarrationCategory.Navigation);
+            }
+
+            // Ctrl+斜杠：跳转到编辑光标所在小节
+            if (Input.GetKeyDown(KeyCode.Slash) &&
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+            {
+                editor.timeline.ScrollTo(editor.timeline.GetPosXFromBarAndBeat(_editCursor), 0.3f);
             }
 
             // 逗号：编辑光标后退 0.1 拍
