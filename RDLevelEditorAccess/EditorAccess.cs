@@ -496,7 +496,8 @@ namespace RDLevelEditorAccess
             // 斜杠：将编辑光标设置为当前播放头位置
             if (Input.GetKeyDown(KeyCode.Slash) &&
                 !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
-                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
             {
                 var tl = editor.timeline;
                 _editCursor = tl.GetBarAndBeatWithPosX(tl.playhead.anchoredPosition.x);
@@ -510,6 +511,20 @@ namespace RDLevelEditorAccess
                 Narration.Say(FormatBarAndBeat(_editCursor) + " 编辑光标", NarrationCategory.Navigation);
             }
 
+            // Ctrl+斜杠：将编辑光标吸附到最近的正拍或半拍
+            // 使用像素空间运算：将当前 X 坐标四舍五入到最近的 0.5 * cellWidth 倍数
+            if (Input.GetKeyDown(KeyCode.Slash) &&
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+            {
+                var tl = editor.timeline;
+                float cursorX = tl.GetPosXFromBarAndBeat(_editCursor);
+                float halfBeat = tl.cellWidth * 0.5f;
+                float snappedX = Mathf.Max(0f, Mathf.Round(cursorX / halfBeat) * halfBeat);
+                _editCursor = tl.GetBarAndBeatWithPosX(snappedX);
+                Narration.Say("吸附到" + FormatBarAndBeat(_editCursor), NarrationCategory.Navigation);
+            }
+
             // Alt+斜杠：跳转到编辑光标所在小节并播放
             // 使用 Alt 而非 Ctrl，因为 LevelSpeed 在 Ctrl 按下时返回 0.75 会导致播放变慢
             if (Input.GetKeyDown(KeyCode.Slash) &&
@@ -519,16 +534,18 @@ namespace RDLevelEditorAccess
                 editor.ScrubToBar(_editCursor.bar, playAfterScrubbing: true);
             }
 
-            // 逗号：编辑光标后退 0.1 拍
+            // 逗号：编辑光标后退（Shift: 0.1拍，无修饰: 1拍）
             if (Input.GetKeyDown(KeyCode.Comma))
             {
-                MoveEditCursor(-0.1f);
+                bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                MoveEditCursor(shift ? -0.1f : -1f);
             }
 
-            // 句号：编辑光标前进 0.1 拍
+            // 句号：编辑光标前进（Shift: 0.1拍，无修饰: 1拍）
             if (Input.GetKeyDown(KeyCode.Period))
             {
-                MoveEditCursor(0.1f);
+                bool shift = Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
+                MoveEditCursor(shift ? 0.1f : 1f);
             }
         }
 
