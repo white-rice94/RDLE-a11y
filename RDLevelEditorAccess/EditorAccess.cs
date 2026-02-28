@@ -451,6 +451,12 @@ namespace RDLevelEditorAccess
                 }
             }
 
+            // 大键盘 0：打开关卡元数据编辑器
+            if (Input.GetKeyDown(KeyCode.Alpha0))
+            {
+                AccessibilityBridge.EditSettings();
+            }
+
             // NEW: Return (无修饰符)：跳转到选中事件所在的小节并开始播放
             if (Input.GetKeyDown(KeyCode.Return) &&
                 !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl) &&
@@ -1617,6 +1623,15 @@ namespace RDLevelEditorAccess
             ["eam.editor.openPropEditor"]        = "正在打开属性编辑器",
             ["eam.editor.openTrackEditor"]       = "正在打开轨道编辑器",
             ["eam.editor.openEventEditor"]       = "正在打开 {0} 属性编辑器",
+            ["eam.editor.openSettingsEditor"]    = "正在打开关卡元数据编辑器",
+            ["eam.settings.song"]                = "歌曲名",
+            ["eam.settings.artist"]              = "艺术家",
+            ["eam.settings.author"]              = "作者",
+            ["eam.settings.description"]         = "描述",
+            ["eam.settings.tags"]                = "标签",
+            ["eam.settings.difficulty"]          = "难度",
+            ["eam.settings.seizureWarning"]      = "癫痫警告",
+            ["eam.settings.canBePlayedOn"]       = "游戏模式",
             ["eam.editor.openRowEditor"]         = "正在打开轨道 {0} 属性编辑器",
             ["eam.sprite.editNotSupported"]      = "精灵编辑暂不支持",
             ["eam.event.jumpAndPlay"]            = "跳转到 {0} 并开始播放",
@@ -1666,6 +1681,15 @@ namespace RDLevelEditorAccess
             ["eam.editor.openPropEditor"]        = "Opening property editor",
             ["eam.editor.openTrackEditor"]       = "Opening track editor",
             ["eam.editor.openEventEditor"]       = "Opening property editor for {0}",
+            ["eam.editor.openSettingsEditor"]    = "Opening level settings editor",
+            ["eam.settings.song"]                = "Song Name",
+            ["eam.settings.artist"]              = "Artist",
+            ["eam.settings.author"]              = "Author",
+            ["eam.settings.description"]         = "Description",
+            ["eam.settings.tags"]                = "Tags",
+            ["eam.settings.difficulty"]          = "Difficulty",
+            ["eam.settings.seizureWarning"]      = "Seizure Warning",
+            ["eam.settings.canBePlayedOn"]       = "Can Be Played On",
             ["eam.editor.openRowEditor"]         = "Opening property editor for track {0}",
             ["eam.sprite.editNotSupported"]      = "Sprite editing not yet supported",
             ["eam.event.jumpAndPlay"]            = "Jump to {0} and play",

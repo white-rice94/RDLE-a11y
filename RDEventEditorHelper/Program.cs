@@ -45,7 +45,11 @@ namespace RDEventEditorHelper
             EditorForm editorForm = new EditorForm();
             
             // 根据编辑类型设置标题
-            string title = editType == "row" ? "编辑轨道 (Edit Row)" : $"编辑事件 (Edit Event): {sourceData?.eventType}";
+            string title = editType == "settings"
+                ? "编辑关卡元数据 (Edit Level Settings)"
+                : editType == "row"
+                    ? "编辑轨道 (Edit Row)"
+                    : $"编辑事件 (Edit Event): {sourceData?.eventType}";
             editorForm.SetData(sourceData?.eventType, sourceData?.properties, title);
 
             editorForm.OnOK += (updates) =>

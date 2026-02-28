@@ -365,6 +365,10 @@ namespace RDLevelEditorAccess.IPC
                         ApplyRowUpdates(_currentRow, resultData.updates);
                         Debug.Log("[FileIPC] 已应用轨道更改");
                     }
+                    else if (_currentEditType == "settings")
+                    {
+                        ApplySettingsUpdates(resultData.updates);
+                    }
                     else if (_currentEvent != null)
                     {
                         ApplyUpdates(_currentEvent, resultData.updates);
@@ -1236,6 +1240,101 @@ namespace RDLevelEditorAccess.IPC
             }
 
             return (opts, localOpts);
+        }
+
+        private List<PropertyData> BuildSettingsProperties()
+        {
+            var settings = scnEditor.instance.levelSettings;
+            var list = new List<PropertyData>();
+
+            list.Add(new PropertyData { name = "song",        displayName = RDString.Get("eam.settings.song"),        value = settings.song        ?? "", type = "String" });
+            list.Add(new PropertyData { name = "artist",      displayName = RDString.Get("eam.settings.artist"),      value = settings.artist      ?? "", type = "String" });
+            list.Add(new PropertyData { name = "author",      displayName = RDString.Get("eam.settings.author"),      value = settings.author      ?? "", type = "String" });
+            list.Add(new PropertyData { name = "description", displayName = RDString.Get("eam.settings.description"), value = settings.description ?? "", type = "String" });
+            list.Add(new PropertyData { name = "tags",        displayName = RDString.Get("eam.settings.tags"),        value = settings.tags        ?? "", type = "String" });
+
+            var diffNames = Enum.GetNames(typeof(LevelDifficulty));
+            list.Add(new PropertyData
+            {
+                name = "difficulty", displayName = RDString.Get("eam.settings.difficulty"),
+                value = settings.difficulty.ToString(), type = "Enum",
+                options = diffNames,
+                localizedOptions = diffNames.Select(n => {
+                    string loc = RDString.GetWithCheck($"enum.LevelDifficulty.{n}", out bool ok);
+                    return ok ? StripRichTextTags(loc) : n;
+                }).ToArray()
+            });
+
+            list.Add(new PropertyData { name = "seizureWarning", displayName = RDString.Get("eam.settings.seizureWarning"), value = settings.seizureWarning.ToString().ToLower(), type = "Bool" });
+
+            var modeNames = Enum.GetNames(typeof(LevelPlayMode));
+            list.Add(new PropertyData
+            {
+                name = "canBePlayedOn", displayName = RDString.Get("eam.settings.canBePlayedOn"),
+                value = settings.canBePlayedOn.ToString(), type = "Enum",
+                options = modeNames,
+                localizedOptions = modeNames.Select(n => {
+                    string loc = RDString.GetWithCheck($"enum.LevelPlayMode.{n}", out bool ok);
+                    return ok ? StripRichTextTags(loc) : n;
+                }).ToArray()
+            });
+
+            return list;
+        }
+
+        public void StartSettingsEditing()
+        {
+            _currentEvent = null;
+            _currentRow = null;
+            _currentEditType = "settings";
+            _sessionToken = System.Guid.NewGuid().ToString();
+
+            var sourceData = new SourceData
+            {
+                editType = "settings",
+                eventType = "LevelSettings",
+                token = _sessionToken,
+                properties = BuildSettingsProperties()
+            };
+
+            try
+            {
+                var opts = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+                File.WriteAllText(_sourcePath, JsonSerializer.Serialize(sourceData, opts));
+                Debug.Log("[FileIPC] 已写入 source.json (元数据编辑)");
+            }
+            catch (Exception ex) { Debug.LogError($"[FileIPC] 写入 source.json 失败: {ex.Message}"); return; }
+
+            LaunchHelper();
+            LockKeyboard();
+            _isPolling = true;
+        }
+
+        private void ApplySettingsUpdates(Dictionary<string, string> updates)
+        {
+            var editor = scnEditor.instance;
+            if (editor == null) return;
+
+            using (new SaveStateScope())
+            {
+                var s = editor.levelSettings;
+                foreach (var kv in updates)
+                {
+                    switch (kv.Key)
+                    {
+                        case "song":           s.song           = kv.Value; break;
+                        case "artist":         s.artist         = kv.Value; break;
+                        case "author":         s.author         = kv.Value; break;
+                        case "description":    s.description    = kv.Value; break;
+                        case "tags":           s.tags           = kv.Value; break;
+                        case "difficulty":     s.difficulty     = (LevelDifficulty)Enum.Parse(typeof(LevelDifficulty), kv.Value); break;
+                        case "seizureWarning": s.seizureWarning = kv.Value == "true"; break;
+                        case "canBePlayedOn":  s.canBePlayedOn  = (LevelPlayMode)Enum.Parse(typeof(LevelPlayMode), kv.Value); break;
+                    }
+                }
+                editor.levelSettings = s;
+            }
+            Debug.Log("[FileIPC] 已应用关卡元数据更改");
         }
 
         private void AddBaseProperties(LevelEvent_Base ev, List<PropertyData> list)

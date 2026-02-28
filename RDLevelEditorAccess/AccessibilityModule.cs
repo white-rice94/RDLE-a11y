@@ -79,6 +79,13 @@ namespace RDLevelEditorAccess
             _fileIPC = null;
             _isInitialized = false;
         }
+
+        public static void EditSettings()
+        {
+            if (!_isInitialized) return;
+            _fileIPC.StartSettingsEditing();
+            Narration.Say(RDString.Get("eam.editor.openSettingsEditor"), NarrationCategory.Instruction);
+        }
     }
 
     // ===================================================================================
