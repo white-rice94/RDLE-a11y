@@ -388,37 +388,133 @@ namespace RDEventEditorHelper
                         break;
 
                     case "Color":
+                        // 增大 GroupBox 高度以容纳两行控件
+                        group.Height = 85;
+
                         var colorPanel = new FlowLayoutPanel
                         {
-                            FlowDirection = FlowDirection.LeftToRight,
+                            FlowDirection = FlowDirection.TopDown,
                             Width = 420,
-                            Height = 30,
-                            Top = 20,
+                            Height = 65,
+                            Top = 15,
                             Left = 10,
                             Margin = new Padding(0)
                         };
-                        
-                        var colorTxt = new TextBox 
-                        { 
-                            Text = prop.value ?? "#FFFFFF", 
-                            Width = 300,
-                            Name = "ColorText"
+
+                        // === 第一行：R / G / B 数值输入 ===
+                        var rgbRow = new FlowLayoutPanel
+                        {
+                            FlowDirection = FlowDirection.LeftToRight,
+                            Width = 420,
+                            Height = 28,
+                            Margin = new Padding(0)
                         };
-                        
+
+                        var initialColor = ParseColor(prop.value ?? "#FFFFFF");
+
+                        var lblR = new Label { Text = "R:", AutoSize = true, Margin = new Padding(0, 5, 2, 0) };
+                        var nudR = new NumericUpDown
+                        {
+                            Minimum = 0, Maximum = 255,
+                            Value = initialColor.R,
+                            Width = 60,
+                            AccessibleName = displayName + " R",
+                            Name = "ColorR"
+                        };
+
+                        var lblG = new Label { Text = "G:", AutoSize = true, Margin = new Padding(8, 5, 2, 0) };
+                        var nudG = new NumericUpDown
+                        {
+                            Minimum = 0, Maximum = 255,
+                            Value = initialColor.G,
+                            Width = 60,
+                            AccessibleName = displayName + " G",
+                            Name = "ColorG"
+                        };
+
+                        var lblB = new Label { Text = "B:", AutoSize = true, Margin = new Padding(8, 5, 2, 0) };
+                        var nudB = new NumericUpDown
+                        {
+                            Minimum = 0, Maximum = 255,
+                            Value = initialColor.B,
+                            Width = 60,
+                            AccessibleName = displayName + " B",
+                            Name = "ColorB"
+                        };
+
+                        rgbRow.Controls.AddRange(new Control[] { lblR, nudR, lblG, nudG, lblB, nudB });
+
+                        // === 第二行：十六进制 + 预览 + 选择按钮 ===
+                        var hexRow = new FlowLayoutPanel
+                        {
+                            FlowDirection = FlowDirection.LeftToRight,
+                            Width = 420,
+                            Height = 28,
+                            Margin = new Padding(0)
+                        };
+
+                        var colorTxt = new TextBox
+                        {
+                            Text = prop.value ?? "#FFFFFF",
+                            Width = 300,
+                            Name = "ColorText",
+                            AccessibleName = displayName + " Hex"
+                        };
+
                         var colorPreview = new Panel
                         {
                             Width = 30,
                             Height = 20,
-                            BackColor = ParseColor(prop.value ?? "#FFFFFF")
+                            BackColor = initialColor,
+                            AccessibleName = displayName + " Preview",
+                            AccessibleRole = AccessibleRole.Graphic
                         };
-                        
+
                         var btnPickColor = new Button
                         {
                             Text = "选择 (Select)",
                             Width = 60,
-                            Height = 23
+                            Height = 23,
+                            AccessibleName = displayName + " 选择颜色"
                         };
-                        
+
+                        hexRow.Controls.AddRange(new Control[] { colorTxt, colorPreview, btnPickColor });
+
+                        // === 同步逻辑 ===
+                        bool isSyncing = false;
+
+                        // RGB → Hex + 预览
+                        EventHandler rgbChanged = (s, e) =>
+                        {
+                            if (isSyncing) return;
+                            isSyncing = true;
+                            var c = Color.FromArgb((int)nudR.Value, (int)nudG.Value, (int)nudB.Value);
+                            colorTxt.Text = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+                            colorPreview.BackColor = c;
+                            isSyncing = false;
+                        };
+                        nudR.ValueChanged += rgbChanged;
+                        nudG.ValueChanged += rgbChanged;
+                        nudB.ValueChanged += rgbChanged;
+
+                        // Hex → RGB + 预览
+                        colorTxt.TextChanged += (s, e) =>
+                        {
+                            if (isSyncing) return;
+                            isSyncing = true;
+                            try
+                            {
+                                var c = ParseColor(colorTxt.Text);
+                                nudR.Value = c.R;
+                                nudG.Value = c.G;
+                                nudB.Value = c.B;
+                                colorPreview.BackColor = c;
+                            }
+                            catch { }
+                            isSyncing = false;
+                        };
+
+                        // ColorDialog → 全部更新
                         btnPickColor.Click += (s, e) =>
                         {
                             using (var colorDialog = new ColorDialog())
@@ -426,22 +522,19 @@ namespace RDEventEditorHelper
                                 colorDialog.Color = colorPreview.BackColor;
                                 if (colorDialog.ShowDialog() == DialogResult.OK)
                                 {
-                                    colorPreview.BackColor = colorDialog.Color;
-                                    colorTxt.Text = $"#{colorDialog.Color.R:X2}{colorDialog.Color.G:X2}{colorDialog.Color.B:X2}";
+                                    isSyncing = true;
+                                    var c = colorDialog.Color;
+                                    nudR.Value = c.R;
+                                    nudG.Value = c.G;
+                                    nudB.Value = c.B;
+                                    colorTxt.Text = $"#{c.R:X2}{c.G:X2}{c.B:X2}";
+                                    colorPreview.BackColor = c;
+                                    isSyncing = false;
                                 }
                             }
                         };
-                        
-                        colorTxt.TextChanged += (s, e) =>
-                        {
-                            try
-                            {
-                                colorPreview.BackColor = ParseColor(colorTxt.Text);
-                            }
-                            catch { }
-                        };
-                        
-                        colorPanel.Controls.AddRange(new Control[] { colorTxt, colorPreview, btnPickColor });
+
+                        colorPanel.Controls.AddRange(new Control[] { rgbRow, hexRow });
                         inputCtrl = colorPanel;
                         break;
 
@@ -893,7 +986,7 @@ namespace RDEventEditorHelper
                     // 处理 Vector2, Float2, FloatExpression2, Color
                     var txtX = panel.Controls.Find("X", false).FirstOrDefault() as TextBox;
                     var txtY = panel.Controls.Find("Y", false).FirstOrDefault() as TextBox;
-                    var colorTxt = panel.Controls.Find("ColorText", false).FirstOrDefault() as TextBox;
+                    var colorTxt = panel.Controls.Find("ColorText", true).FirstOrDefault() as TextBox;
                     
                     if (txtX != null && txtY != null)
                     {
