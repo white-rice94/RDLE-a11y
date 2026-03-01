@@ -150,6 +150,8 @@ namespace RDLevelEditorAccess
 
             // 8. 没有任何菜单打开时，进入时间轴逻辑 (这里交还给游戏原生)
             lastSelectedObj = null;
+            currentMenu = ""; // 重置当前菜单状态
+            CustomUINavigator.EnableNativeNavigation(); // 恢复原生导航
             HandleTimelineNavigation();
         }
 
@@ -257,6 +259,13 @@ namespace RDLevelEditorAccess
             // 执行导航
             if (direction != 0)
             {
+                // 安全检查：确保 allControls 已初始化
+                if (allControls == null || allControls.Count == 0)
+                {
+                    Debug.LogWarning($"[HandleGeneralUINavigation] 无法导航：allControls 未初始化或为空");
+                    return;
+                }
+
                 int newIndex = currentIndex;
 
                 if (!isTab)
@@ -313,7 +322,20 @@ namespace RDLevelEditorAccess
             // 处理确认键
             if (isEnterKey)
             {
+                // 安全检查：确保 allControls 已初始化且 currentIndex 有效
+                if (allControls == null || currentIndex < 0 || currentIndex >= allControls.Count)
+                {
+                    Debug.LogWarning($"[HandleGeneralUINavigation] 无法处理 Enter 键：allControls={allControls?.Count ?? -1}, currentIndex={currentIndex}");
+                    return;
+                }
+
                 var currentGraphic = allControls[currentIndex];
+                if (currentGraphic == null)
+                {
+                    Debug.LogWarning($"[HandleGeneralUINavigation] allControls[{currentIndex}] 为 null");
+                    return;
+                }
+
                 var item = currentGraphic.GetComponent<Selectable>();
 
                 if (item != null && item.interactable)
@@ -561,8 +583,11 @@ namespace RDLevelEditorAccess
             // 快速移动事件（Z/C/X 键）
             // ===================================================================================
 
+            // 检查是否按下了 Ctrl 键（避免与 Ctrl+X/Ctrl+C 冲突）
+            bool ctrlPressed = Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+
             // Z键：选中事件后退（Beat模式: Alt 0.01拍/Shift 0.1拍/无修饰 1拍；BarOnly模式: 1小节）
-            if (Input.GetKeyDown(KeyCode.Z))
+            if (Input.GetKeyDown(KeyCode.Z) && !ctrlPressed)
             {
                 var moveMode = GetSelectedEventsMoveMode();
                 if (moveMode == EventMoveMode.Mixed)
@@ -582,7 +607,7 @@ namespace RDLevelEditorAccess
             }
 
             // X键：选中事件前进（Beat模式: Alt 0.01拍/Shift 0.1拍/无修饰 1拍；BarOnly模式: 1小节）
-            if (Input.GetKeyDown(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.X) && !ctrlPressed)
             {
                 var moveMode = GetSelectedEventsMoveMode();
                 if (moveMode == EventMoveMode.Mixed)
@@ -602,7 +627,7 @@ namespace RDLevelEditorAccess
             }
 
             // C键：选中事件吸附到最近的正拍或半拍
-            if (Input.GetKeyDown(KeyCode.C))
+            if (Input.GetKeyDown(KeyCode.C) && !ctrlPressed)
             {
                 var moveMode = GetSelectedEventsMoveMode();
                 if (moveMode == EventMoveMode.Mixed)
