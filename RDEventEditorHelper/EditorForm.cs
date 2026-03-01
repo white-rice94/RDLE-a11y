@@ -980,7 +980,19 @@ namespace RDEventEditorHelper
                 else if (ctrl is CheckBox chk)
                     value = chk.Checked ? "true" : "false";
                 else if (ctrl is ComboBox cmb)
-                    value = cmb.SelectedItem?.ToString();
+                {
+                    // 对于枚举/行选择，使用 PropertyData.value（已在 SelectedValueChanged 中更新为原始枚举名）
+                    var prop = _properties.FirstOrDefault(p => p.name == propName);
+                    if (prop != null && (prop.type == "Enum" || prop.type == "Row"))
+                    {
+                        value = prop.value;  // 使用原始枚举名（如 "Medium"）
+                    }
+                    else
+                    {
+                        // 其他类型的 ComboBox（如果有）回退到显示文本
+                        value = cmb.SelectedItem?.ToString();
+                    }
+                }
                 else if (ctrl is FlowLayoutPanel panel)
                 {
                     // 处理 Vector2, Float2, FloatExpression2, Color
