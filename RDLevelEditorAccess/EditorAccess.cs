@@ -535,7 +535,9 @@ namespace RDLevelEditorAccess
 
             // Shift+斜杠：朗读编辑光标当前位置
             if (Input.GetKeyDown(KeyCode.Slash) &&
-                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
                 Narration.Say(FormatBarAndBeat(_editCursor) + RDString.Get("eam.cursor.suffix"), NarrationCategory.Navigation);
             }
@@ -544,7 +546,8 @@ namespace RDLevelEditorAccess
             // 使用像素空间运算：将当前 X 坐标四舍五入到最近的 0.5 * cellWidth 倍数
             if (Input.GetKeyDown(KeyCode.Slash) &&
                 (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
-                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
                 var tl = editor.timeline;
                 float cursorX = tl.GetPosXFromBarAndBeat(_editCursor);
@@ -558,9 +561,19 @@ namespace RDLevelEditorAccess
             // 使用 Alt 而非 Ctrl，因为 LevelSpeed 在 Ctrl 按下时返回 0.75 会导致播放变慢
             if (Input.GetKeyDown(KeyCode.Slash) &&
                 (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) &&
-                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
             {
                 editor.ScrubToBar(_editCursor.bar, playAfterScrubbing: true);
+            }
+
+            // Ctrl+Shift+斜杠：打开跳转到位置对话框
+            if (Input.GetKeyDown(KeyCode.Slash) &&
+                (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
+                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+            {
+                AccessibilityBridge.JumpToCursor();
+                return;
             }
 
             // 逗号：编辑光标后退（Alt: 0.01拍，Shift: 0.1拍，无修饰: 1拍）
@@ -1899,6 +1912,10 @@ namespace RDLevelEditorAccess
             ["eam.confirm.changeRowType"]        = "切换轨道类型将删除轨道上的所有事件（{0}个），是否继续？",
             ["eam.error.roomFull"]               = "房间 {0} 已满，无法移动轨道",
             ["eam.error.helperNotFound"]         = "无法启动事件编辑器，请确保 RDEventEditorHelper.exe 存在",
+            ["eam.cursor.jump.title"]            = "跳转到位置",
+            ["eam.cursor.jump.bar"]              = "小节",
+            ["eam.cursor.jump.beat"]             = "拍",
+            ["eam.cursor.jump.success"]          = "已跳转到 {0}",
         };
 
         private static readonly Dictionary<string, string> _en = new Dictionary<string, string>
@@ -1974,6 +1991,10 @@ namespace RDLevelEditorAccess
             ["eam.confirm.changeRowType"]        = "Changing row type will delete all {0} events on this track. Continue?",
             ["eam.error.roomFull"]               = "Room {0} is full, cannot move track",
             ["eam.error.helperNotFound"]         = "Cannot start event editor. Please ensure RDEventEditorHelper.exe exists",
+            ["eam.cursor.jump.title"]            = "Jump to Position",
+            ["eam.cursor.jump.bar"]              = "Bar",
+            ["eam.cursor.jump.beat"]             = "Beat",
+            ["eam.cursor.jump.success"]          = "Jumped to {0}",
         };
 
         [HarmonyPrefix]

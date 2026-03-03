@@ -371,6 +371,10 @@ namespace RDLevelEditorAccess.IPC
                     {
                         ApplySettingsUpdates(resultData.updates);
                     }
+                    else if (_currentEditType == "jump")
+                    {
+                        ApplyJumpToCursorUpdates(resultData.updates);
+                    }
                     else if (_currentEvent != null)
                     {
                         ApplyUpdates(_currentEvent, resultData.updates);
@@ -1375,6 +1379,66 @@ namespace RDLevelEditorAccess.IPC
             _isPolling = true;
         }
 
+        public void StartJumpToCursorEdit()
+        {
+            if (_isPolling)
+            {
+                Debug.LogWarning("[FileIPC] 已有编辑会话进行中");
+                return;
+            }
+
+            if (AccessLogic.Instance == null)
+            {
+                Debug.LogError("[FileIPC] AccessLogic.Instance 为空");
+                return;
+            }
+
+            _currentEvent = null;
+            _currentRow = null;
+            _currentEditType = "jump";
+            _sessionToken = System.Guid.NewGuid().ToString();
+
+            var cursor = AccessLogic.Instance._editCursor;
+
+            var properties = new List<PropertyData>
+            {
+                new PropertyData
+                {
+                    name = "bar",
+                    displayName = RDString.Get("eam.cursor.jump.bar"),
+                    value = cursor.bar.ToString(),
+                    type = "Int"
+                },
+                new PropertyData
+                {
+                    name = "beat",
+                    displayName = RDString.Get("eam.cursor.jump.beat"),
+                    value = cursor.beat.ToString("F2"),
+                    type = "Float"
+                }
+            };
+
+            var sourceData = new SourceData
+            {
+                editType = "jump",
+                eventType = "JumpToCursor",
+                token = _sessionToken,
+                properties = properties
+            };
+
+            try
+            {
+                var opts = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
+                File.WriteAllText(_sourcePath, JsonSerializer.Serialize(sourceData, opts));
+                Debug.Log("[FileIPC] 已写入 source.json (跳转光标)");
+            }
+            catch (Exception ex) { Debug.LogError($"[FileIPC] 写入 source.json 失败: {ex.Message}"); return; }
+
+            LaunchHelper();
+            LockKeyboard();
+            _isPolling = true;
+        }
+
         private void ApplySettingsUpdates(Dictionary<string, string> updates)
         {
             var editor = scnEditor.instance;
@@ -1414,6 +1478,46 @@ namespace RDLevelEditorAccess.IPC
                 editor.levelSettings = s;
             }
             Debug.Log("[FileIPC] 已应用关卡元数据更改");
+        }
+
+        private void ApplyJumpToCursorUpdates(Dictionary<string, string> updates)
+        {
+            if (AccessLogic.Instance == null) return;
+            if (updates == null) return;
+
+            try
+            {
+                int bar = 1;
+                float beat = 1f;
+
+                if (updates.ContainsKey("bar"))
+                {
+                    if (!int.TryParse(updates["bar"], out bar) || bar < 1)
+                    {
+                        bar = 1;
+                    }
+                }
+
+                if (updates.ContainsKey("beat"))
+                {
+                    if (!float.TryParse(updates["beat"], out beat) || beat < 1f)
+                    {
+                        beat = 1f;
+                    }
+                }
+
+                AccessLogic.Instance._editCursor = new BarAndBeat(bar, beat);
+
+                string position = ModUtils.FormatBarAndBeat(AccessLogic.Instance._editCursor);
+                string message = string.Format(RDString.Get("eam.cursor.jump.success"), position);
+                Narration.Say(message, NarrationCategory.Navigation);
+
+                Debug.Log($"[FileIPC] 已跳转光标到 {position}");
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FileIPC] 跳转光标失败: {ex.Message}");
+            }
         }
 
         private void AddBaseProperties(LevelEvent_Base ev, List<PropertyData> list)

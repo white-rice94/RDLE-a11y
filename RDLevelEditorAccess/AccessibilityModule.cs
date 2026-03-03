@@ -86,6 +86,19 @@ namespace RDLevelEditorAccess
             _fileIPC.StartSettingsEditing();
             Narration.Say(RDString.Get("eam.editor.openSettingsEditor"), NarrationCategory.Instruction);
         }
+
+        /// <summary>
+        /// 打开跳转到位置对话框
+        /// </summary>
+        public static void JumpToCursor()
+        {
+            if (!_isInitialized)
+            {
+                Debug.LogError("[AccessibilityBridge] 未初始化");
+                return;
+            }
+            _fileIPC.StartJumpToCursorEdit();
+        }
     }
 
     // ===================================================================================

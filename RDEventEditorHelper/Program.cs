@@ -62,7 +62,9 @@ namespace RDEventEditorHelper
                 ? "编辑关卡元数据 (Edit Level Settings)"
                 : editType == "row"
                     ? "编辑轨道 (Edit Row)"
-                    : $"编辑事件 (Edit Event): {sourceData?.eventType}";
+                    : editType == "jump"
+                        ? "跳转到位置 (Jump to Position)"
+                        : $"编辑事件 (Edit Event): {sourceData?.eventType}";
             editorForm.SetData(sourceData?.eventType, sourceData?.properties, title, sourceData?.levelAudioFiles);
 
             editorForm.OnOK += (updates) =>
