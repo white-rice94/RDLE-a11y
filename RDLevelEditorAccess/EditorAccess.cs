@@ -535,7 +535,9 @@ namespace RDLevelEditorAccess
 
             // Shift+斜杠：朗读编辑光标当前位置
             if (Input.GetKeyDown(KeyCode.Slash) &&
-                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)))
+                (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift)) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
                 Narration.Say(FormatBarAndBeat(_editCursor) + RDString.Get("eam.cursor.suffix"), NarrationCategory.Navigation);
             }
@@ -544,7 +546,8 @@ namespace RDLevelEditorAccess
             // 使用像素空间运算：将当前 X 坐标四舍五入到最近的 0.5 * cellWidth 倍数
             if (Input.GetKeyDown(KeyCode.Slash) &&
                 (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) &&
-                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
+                !Input.GetKey(KeyCode.LeftAlt) && !Input.GetKey(KeyCode.RightAlt))
             {
                 var tl = editor.timeline;
                 float cursorX = tl.GetPosXFromBarAndBeat(_editCursor);
@@ -558,7 +561,8 @@ namespace RDLevelEditorAccess
             // 使用 Alt 而非 Ctrl，因为 LevelSpeed 在 Ctrl 按下时返回 0.75 会导致播放变慢
             if (Input.GetKeyDown(KeyCode.Slash) &&
                 (Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt)) &&
-                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift))
+                !Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.RightShift) &&
+                !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
             {
                 editor.ScrubToBar(_editCursor.bar, playAfterScrubbing: true);
             }
