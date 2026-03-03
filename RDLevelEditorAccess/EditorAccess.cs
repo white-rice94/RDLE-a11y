@@ -1840,6 +1840,42 @@ namespace RDLevelEditorAccess
     [HarmonyPatch(typeof(scnEditor), "Paste", new[] { typeof(bool) })]
     public static class PasteAlignmentPatch
     {
+        [HarmonyPrefix]
+        public static void PastePrefix(scnEditor __instance, bool onNextBar)
+        {
+            Debug.Log($"[PasteDebug] ========== Prefix: 粘贴前准备 ==========");
+            Debug.Log($"[PasteDebug] Prefix: onNextBar参数: {onNextBar}");
+
+            // 仅在 onNextBar=false 时取消选择
+            if (onNextBar)
+            {
+                Debug.Log($"[PasteDebug] Prefix: onNextBar=true，跳过取消选择");
+                return;
+            }
+
+            if (__instance == null)
+            {
+                Debug.LogWarning($"[PasteDebug] Prefix: __instance 为 null");
+                return;
+            }
+
+            Debug.Log($"[PasteDebug] Prefix: 当前选中事件数量: {__instance.selectedControls?.Count ?? 0}");
+
+            // 取消选择所有事件
+            if (__instance.selectedControls != null && __instance.selectedControls.Count > 0)
+            {
+                Debug.Log($"[PasteDebug] Prefix: 开始取消选择所有事件...");
+                __instance.DeselectAllEventControls(updateInspectorUI: false, sound: false);
+                Debug.Log($"[PasteDebug] Prefix: 取消选择完成，当前选中数量: {__instance.selectedControls?.Count ?? 0}");
+            }
+            else
+            {
+                Debug.Log($"[PasteDebug] Prefix: 没有选中的事件，无需取消选择");
+            }
+
+            Debug.Log($"[PasteDebug] Prefix: 准备完成");
+        }
+
         [HarmonyPostfix]
         public static void PastePostfix(scnEditor __instance, bool onNextBar)
         {
