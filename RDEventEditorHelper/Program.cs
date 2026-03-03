@@ -65,7 +65,7 @@ namespace RDEventEditorHelper
                     : editType == "jump"
                         ? "跳转到位置 (Jump to Position)"
                         : $"编辑事件 (Edit Event): {sourceData?.eventType}";
-            editorForm.SetData(sourceData?.eventType, sourceData?.properties, title, sourceData?.levelAudioFiles);
+            editorForm.SetData(sourceData?.eventType, sourceData?.properties, title, sourceData?.levelAudioFiles, sourceData?.levelDirectory);
 
             editorForm.OnOK += (updates) =>
             {
@@ -128,6 +128,7 @@ namespace RDEventEditorHelper
             public string token;  // 会话特征码
             public PropertyData[] properties;
             public string[] levelAudioFiles;  // 关卡目录中的音频文件名列表
+            public string levelDirectory;  // 关卡目录路径
         }
 
         private class ResultData

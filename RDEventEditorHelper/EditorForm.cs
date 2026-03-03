@@ -116,6 +116,7 @@ namespace RDEventEditorHelper
         private string _eventType;
         private PropertyData[] _properties;
         private string[] _levelAudioFiles;
+        private string _levelDirectory;
         private Dictionary<string, Control> _controls = new Dictionary<string, Control>();
         private bool _isClosingByButton = false;
         private string _pendingExecuteMethod = null;  // 点击操作按钮时要执行的方法名
@@ -187,11 +188,12 @@ namespace RDEventEditorHelper
             };
         }
 
-        public void SetData(string eventType, PropertyData[] properties, string title = null, string[] levelAudioFiles = null)
+        public void SetData(string eventType, PropertyData[] properties, string title = null, string[] levelAudioFiles = null, string levelDirectory = null)
         {
             _eventType = eventType;
             _properties = properties;
             _levelAudioFiles = levelAudioFiles;
+            _levelDirectory = levelDirectory;
             this.Text = title ?? $"编辑事件 (Edit Event): {eventType}";
             BuildUI();
 
@@ -586,13 +588,91 @@ namespace RDEventEditorHelper
                             {
                                 using (var ofd = new OpenFileDialog())
                                 {
-                                    ofd.Filter = "音频文件 (Audio)|*.wav;*.ogg;*.mp3|所有文件|*.*";
+                                    ofd.Filter = "音频文件 (Audio)|*.wav;*.ogg;*.mp3;*.aiff;*.aif|所有文件|*.*";
                                     ofd.Title = prop.itsASong ? "选择歌曲文件 (Select Song File)" : "选择音效文件 (Select Sound File)";
                                     if (ofd.ShowDialog() == DialogResult.OK)
                                     {
-                                        string fileName = System.IO.Path.GetFileName(ofd.FileName);
+                                        string selectedFile = ofd.FileName;
+                                        string fileName = System.IO.Path.GetFileName(selectedFile);
+
+                                        // 验证文件格式
+                                        string ext = System.IO.Path.GetExtension(fileName).ToLowerInvariant();
+                                        var supportedExts = new[] { ".mp3", ".wav", ".ogg", ".aiff", ".aif" };
+                                        if (!supportedExts.Contains(ext))
+                                        {
+                                            MessageBox.Show(
+                                                $"不支持的音频格式: {ext}\n支持的格式: .mp3, .wav, .ogg, .aiff, .aif\n\nUnsupported audio format: {ext}\nSupported formats: .mp3, .wav, .ogg, .aiff, .aif",
+                                                "格式错误 (Format Error)",
+                                                MessageBoxButtons.OK,
+                                                MessageBoxIcon.Error);
+                                            return;
+                                        }
+
+                                        // 复制文件到关卡目录（如果路径可用）
+                                        if (!string.IsNullOrEmpty(_levelDirectory))
+                                        {
+                                            try
+                                            {
+                                                string destPath = System.IO.Path.Combine(_levelDirectory, fileName);
+
+                                                // 检查是否为同一文件
+                                                bool isSameFile = System.IO.Path.GetFullPath(selectedFile).Equals(
+                                                    System.IO.Path.GetFullPath(destPath),
+                                                    StringComparison.OrdinalIgnoreCase);
+
+                                                if (!isSameFile)
+                                                {
+                                                    // 检查目标文件是否已存在
+                                                    if (System.IO.File.Exists(destPath))
+                                                    {
+                                                        var result = MessageBox.Show(
+                                                            $"文件 '{fileName}' 已存在。是否覆盖？\n\nFile '{fileName}' already exists. Overwrite?",
+                                                            "文件已存在 (File Exists)",
+                                                            MessageBoxButtons.YesNo,
+                                                            MessageBoxIcon.Question);
+
+                                                        if (result == DialogResult.No)
+                                                        {
+                                                            return;
+                                                        }
+                                                    }
+
+                                                    // 复制文件
+                                                    System.IO.File.Copy(selectedFile, destPath, overwrite: true);
+                                                }
+                                            }
+                                            catch (UnauthorizedAccessException)
+                                            {
+                                                MessageBox.Show(
+                                                    "权限不足，无法复制文件\n\nInsufficient permissions to copy file",
+                                                    "权限错误 (Permission Error)",
+                                                    MessageBoxButtons.OK,
+                                                    MessageBoxIcon.Error);
+                                                return;
+                                            }
+                                            catch (System.IO.IOException ex)
+                                            {
+                                                MessageBox.Show(
+                                                    $"文件复制失败: {ex.Message}\n\nFile copy failed: {ex.Message}",
+                                                    "复制失败 (Copy Failed)",
+                                                    MessageBoxButtons.OK,
+                                                    MessageBoxIcon.Error);
+                                                return;
+                                            }
+                                            catch (Exception ex)
+                                            {
+                                                MessageBox.Show(
+                                                    $"未知错误: {ex.Message}\n\nUnknown error: {ex.Message}",
+                                                    "错误 (Error)",
+                                                    MessageBoxButtons.OK,
+                                                    MessageBoxIcon.Error);
+                                                return;
+                                            }
+                                        }
+
+                                        // 更新隐藏文本框
                                         txtHiddenFilename.Text = fileName;
-                                        
+
                                         // 如果有 ListView，添加并选中
                                         var lv = soundPanel.Controls.Find("SoundListView", false).FirstOrDefault() as ListView;
                                         if (lv != null)

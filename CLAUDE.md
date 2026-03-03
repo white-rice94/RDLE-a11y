@@ -41,7 +41,7 @@ RDLevelEditorAccess/
 ├── EditorAccess.cs           # BepInEx plugin entry, Harmony patches, core logic
 ├── AccessibilityModule.cs    # Public API (AccessibilityBridge) + UnityDispatcher
 ├── CustomUINavigator.cs      # Disables native UI navigation
-├── InputFieldReader.cs.cs    # Text-to-speech for input fields
+├── InputFieldReader.cs       # Text-to-speech for input fields
 └── IPC/
     └── FileIPC.cs            # File-based IPC with Helper
 
@@ -50,13 +50,30 @@ RDEventEditorHelper/
 └── EditorForm.cs             # WinForms property editor UI
 
 agents references/Assembly-CSharp/
-└── RDLevelEditor/            # Decompiled game code (170+ files)
+└── RDLevelEditor/            # Decompiled game code (349 files)
     ├── scnEditor.cs          # Main editor controller (~4000 lines)
     ├── LevelEvent_Base.cs    # Base class for all events
     ├── LevelEventInfo.cs     # Event metadata system
     ├── BasePropertyInfo.cs   # Property type system
     └── InspectorPanel.cs     # Property panel base
 ```
+
+## Keyboard Shortcuts
+
+The mod provides extensive keyboard navigation for accessibility:
+
+| Shortcut | Function |
+|----------|----------|
+| **Insert** | Add event at current timeline position |
+| **Ctrl+Insert** | Add row/sprite (context-dependent) |
+| **Return** | Activate selected item / Open property editor |
+| **Arrow Keys** | Navigate timeline / Move events |
+| **Alt+Arrow** | Fine adjustment (0.01 beat) |
+| **Shift+Arrow** | Medium adjustment (0.1 beat) |
+| **Plain Arrow** | Coarse adjustment (1 beat) |
+| **Tab** | Navigate UI elements in menus |
+
+When `virtualMenuState != None`, arrow keys navigate virtual menus instead of the timeline.
 
 ## Key Architecture Concepts
 
@@ -82,11 +99,13 @@ The mod and helper communicate via JSON files:
      "properties": [
        { "name": "bar", "type": "Int", "value": "1" },
        { "name": "btn", "type": "Button", "methodName": "DoSomething" }
-     ]
+     ],
+     "levelAudioFiles": ["song.ogg", "sfx.wav"]
    }
    ```
-   For row editing, use `"editType": "row"` and `"eventType": "MakeRow"`.
-   For level settings editing, use `"editType": "settings"`.
+   - For row editing: `"editType": "row"` and `"eventType": "MakeRow"`
+   - For level settings: `"editType": "settings"`
+   - `levelAudioFiles`: Array of audio files in level directory (for SoundData properties)
 
 2. **Mod launches** `RDEventEditorHelper.exe`
 
@@ -101,6 +120,29 @@ The mod and helper communicate via JSON files:
 
 The `token` field is used to match responses to requests and prevent race conditions.
 
+#### Dynamic UI Visibility System
+
+The Helper supports dynamic property visibility via bidirectional IPC:
+
+1. **Helper → temp/validateVisibility.json**: Request to evaluate `enableIf` condition
+   ```json
+   {
+     "token": "...",
+     "enableIfExpression": "rhythm == 'X'",
+     "currentValues": { "rhythm": "X", "bar": "1" }
+   }
+   ```
+
+2. **Mod → temp/validateVisibilityResponse.json**: Evaluation result
+   ```json
+   {
+     "token": "...",
+     "isVisible": true
+   }
+   ```
+
+This allows properties to show/hide in real-time as the user edits, without losing focus. The mod announces visibility changes via low-priority screen reader notifications.
+
 ### AccessibilityBridge (Public API)
 
 `AccessibilityBridge` in `AccessibilityModule.cs` is the entry point — do NOT call `FileIPC` directly:
@@ -109,8 +151,38 @@ The `token` field is used to match responses to requests and prevent race condit
 AccessibilityBridge.Initialize(gameObject);  // Call once on startup (from AccessLogic.Awake)
 AccessibilityBridge.EditEvent(levelEvent);   // Open event property editor
 AccessibilityBridge.EditRow(rowIndex);       // Open row property editor
+AccessibilityBridge.EditSettings();          // Open level settings editor
 AccessibilityBridge.Update();                // Called every frame from AccessLogic.Update()
 ```
+
+### ModUtils Utilities
+
+Static helper class in `EditorAccess.cs` with formatting and localization methods:
+
+```csharp
+ModUtils.eventNameI18n(LevelEvent_Base evt)      // Get localized event name
+ModUtils.eventSelectI18n(LevelEvent_Base evt)    // Get selection announcement text
+ModUtils.FormatBarAndBeat(BarAndBeat bb)         // Format bar/beat display
+ModUtils.FormatBeat(float beat)                  // Format beat with smart rounding
+```
+
+### Navigation System
+
+`AccessLogic` implements three distinct navigation handlers:
+
+1. **HandleGeneralUINavigation**: For Unity UI menus (Tab, Arrow keys, Enter)
+   - Activates when Unity UI menus are open
+   - Provides keyboard navigation for buttons, dropdowns, etc.
+
+2. **HandleTimelineNavigation**: For timeline operations
+   - Event selection and movement
+   - Timeline scrolling
+   - Event insertion/deletion
+
+3. **HandleVirtualMenu**: For custom selection dialogs
+   - Character/sprite selection
+   - Event type selection
+   - Uses `VirtualMenuState` enum to track active menu
 
 ### VirtualMenuState
 
@@ -126,6 +198,18 @@ private enum VirtualMenuState
 ```
 
 When `virtualMenuState != None`, arrow keys navigate the virtual menu instead of the timeline.
+
+### InputFieldReader
+
+`InputFieldReader.cs` implements a sophisticated text-to-speech system for input fields:
+
+- **State diffing**: Compares previous/current text and caret position
+- **Character-by-character reading**: Announces typed/deleted characters
+- **Caret movement**: Reads character at cursor when navigating
+- **Password support**: Announces "星号" for password fields
+- **Focus detection**: Prevents false announcements on focus changes
+
+The reader monitors all TMP_InputField components and provides real-time feedback for screen reader users.
 
 ### SaveState Pattern
 
@@ -145,7 +229,7 @@ The mod uses a two-part initialization:
 2. **AccessLogic** (MonoBehaviour): Injected into scene, handles per-frame logic
 
 ```csharp
-[BepInPlugin("com.hzt.rd-editor-access", "RDEditorAccess", "0.3")]
+[BepInPlugin("com.hzt.rd-editor-access", "RDEditorAccess", "1.0")]
 public class EditorAccess : BaseUnityPlugin
 {
     public void Awake()
@@ -163,6 +247,21 @@ public class AccessLogic : MonoBehaviour
     public void Update() { /* per-frame logic */ }
 }
 ```
+
+### Harmony Patches
+
+The mod applies multiple Harmony patches to intercept game behavior:
+
+| Patch Class | Target Method | Purpose |
+|-------------|---------------|---------|
+| **EditorPatch** | SelectEventControl | Announce event selection |
+| **EditorPatch** | AddEventControlToSelection | Announce multi-selection |
+| **TabSectionPatch** | ChangePage | Announce tab changes |
+| **TimelinePatch** | PreviousPage/NextPage | Announce timeline navigation |
+| **PastePatch** | Paste | Announce paste operations |
+| **RDStringPatch** | Get | Inject localized strings |
+
+All patches use `[HarmonyPostfix]` to run after the original method, ensuring game functionality is preserved.
 
 ## Code Style Guidelines
 
@@ -289,6 +388,8 @@ catch (Exception ex)
     Debug.LogException(ex);  // Full stack trace
 }
 ```
+
+**Debug Mode**: The Helper application supports DEBUG mode. When enabled, it writes detailed logs to `RDEventEditorHelper.log` in the game directory.
 
 ## Git Commit Messages
 

@@ -64,7 +64,8 @@ namespace RDLevelEditorAccess.IPC
                 eventType = levelEvent.type.ToString(),
                 token = _sessionToken,
                 properties = properties,
-                levelAudioFiles = GetLevelAudioFiles()
+                levelAudioFiles = GetLevelAudioFiles(),
+                levelDirectory = GetLevelDirectory()
             };
 
             try
@@ -113,7 +114,8 @@ namespace RDLevelEditorAccess.IPC
                 eventType = "MakeRow",
                 token = _sessionToken,
                 properties = properties,
-                levelAudioFiles = GetLevelAudioFiles()
+                levelAudioFiles = GetLevelAudioFiles(),
+                levelDirectory = GetLevelDirectory()
             };
 
             try
@@ -1363,7 +1365,8 @@ namespace RDLevelEditorAccess.IPC
                 eventType = "LevelSettings",
                 token = _sessionToken,
                 properties = BuildSettingsProperties(),
-                levelAudioFiles = GetLevelAudioFiles()
+                levelAudioFiles = GetLevelAudioFiles(),
+                levelDirectory = GetLevelDirectory()
             };
 
             try
@@ -1423,7 +1426,8 @@ namespace RDLevelEditorAccess.IPC
                 editType = "jump",
                 eventType = "JumpToCursor",
                 token = _sessionToken,
-                properties = properties
+                properties = properties,
+                levelDirectory = GetLevelDirectory()
             };
 
             try
@@ -1783,6 +1787,22 @@ namespace RDLevelEditorAccess.IPC
             }
         }
 
+        private string GetLevelDirectory()
+        {
+            try
+            {
+                string filePath = scnEditor.instance?.openedFilePath;
+                if (string.IsNullOrEmpty(filePath)) return null;
+                string levelDir = Path.GetDirectoryName(filePath);
+                return Directory.Exists(levelDir) ? levelDir : null;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FileIPC] 获取关卡目录失败: {ex.Message}");
+                return null;
+            }
+        }
+
         [Serializable]
         private class SourceData
         {
@@ -1791,6 +1811,7 @@ namespace RDLevelEditorAccess.IPC
             public string token;  // 会话特征码
             public List<PropertyData> properties;
             public string[] levelAudioFiles;  // 关卡目录中的音频文件名列表
+            public string levelDirectory;  // 关卡目录路径
         }
 
         [Serializable]
