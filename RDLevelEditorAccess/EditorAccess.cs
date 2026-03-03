@@ -120,7 +120,20 @@ namespace RDLevelEditorAccess
 
             if (Input.GetKeyDown(KeyCode.F10))
             {
-                scnEditor.instance.MenuButtonClick();
+                // 只在没有其他菜单打开时才触发主菜单
+                bool hasOtherMenuOpen =
+                    (scnEditor.instance.copyrightPopup != null && scnEditor.instance.copyrightPopup.activeInHierarchy) ||
+                    (scnEditor.instance.insertUrlContainer != null && scnEditor.instance.insertUrlContainer.activeInHierarchy) ||
+                    (scnEditor.instance.dialog != null && scnEditor.instance.dialog.gameObject.activeInHierarchy) ||
+                    (scnEditor.instance.colorPickerPopup != null && scnEditor.instance.colorPickerPopup.gameObject.activeInHierarchy) ||
+                    (scnEditor.instance.characterPickerPopup != null && scnEditor.instance.characterPickerPopup.gameObject.activeInHierarchy) ||
+                    (scnEditor.instance.publishPopup != null && scnEditor.instance.publishPopup.gameObject.activeInHierarchy) ||
+                    (scnEditor.instance.settingsMenu != null && scnEditor.instance.settingsMenu.gameObject.activeInHierarchy);
+
+                if (!hasOtherMenuOpen)
+                {
+                    scnEditor.instance.MenuButtonClick();
+                }
             }
 
             // --- 菜单/弹窗拦截逻辑 (优先级从高到低) ---
@@ -142,8 +155,12 @@ namespace RDLevelEditorAccess
             // 5. 发布/打包窗口
             if (scnEditor.instance.publishPopup != null && CheckAndNavigate(scnEditor.instance.publishPopup.gameObject, "发布窗口")) return;
 
-            // 6. 设置菜单
-            //if (scnEditor.instance.settingsMenu != null && CheckAndNavigate(scnEditor.instance.settingsMenu.gameObject, "设置菜单")) return;
+            // 6. 设置菜单（已有原生无障碍支持，不拦截导航，但需要阻止 Update 继续执行）
+            if (scnEditor.instance.settingsMenu != null && scnEditor.instance.settingsMenu.gameObject.activeInHierarchy)
+            {
+                // 设置菜单打开时，直接返回，不执行后续的主菜单和时间轴导航
+                return;
+            }
 
             // 7. 顶部下拉菜单
             if (scnEditor.instance.mainMenu != null && CheckAndNavigate(scnEditor.instance.mainMenu, "下拉菜单")) return;
