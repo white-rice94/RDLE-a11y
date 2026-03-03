@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Rhythm Doctor Level Editor Accessibility Mod User Manual</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="rhythm-doctor-level-editor-accessibility-mod-user-manual">Rhythm Doctor Level Editor Accessibility Mod User Manual</h1>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ul>
+<li><a href="#rhythm-doctor-level-editor-accessibility-mod-user-manual">Rhythm Doctor Level Editor Accessibility Mod User Manual</a>
+<ul>
+<li><a href="#table-of-contents">Table of Contents</a></li>
+<li><a href="#0-tldr-version">0. TL;DR Version</a></li>
+<li><a href="#1-basic-introduction">1. Basic Introduction</a>
+<ul>
+<li><a href="#11-what-is-this">1.1 What is this?</a></li>
+<li><a href="#12-main-features">1.2 Main Features</a></li>
+<li><a href="#13-important-notes">1.3 Important Notes</a></li>
+</ul>
+</li>
+<li><a href="#2-installation">2. Installation</a>
+<ul>
+<li><a href="#21-system-requirements">2.1 System Requirements</a></li>
+<li><a href="#22-installation-steps">2.2 Installation Steps</a></li>
+</ul>
+</li>
+<li><a href="#3-quick-start">3. Quick Start</a>
+<ul>
+<li><a href="#31-editor-basic-concepts">3.1 Editor Basic Concepts</a>
+<ul>
+<li><a href="#311-tabs">3.1.1 Tabs</a></li>
+<li><a href="#312-events">3.1.2 Events</a></li>
+<li><a href="#313-rows">3.1.3 Rows</a></li>
+<li><a href="#314-rooms">3.1.4 Rooms</a></li>
+</ul>
+</li>
+<li><a href="#32-first-launch">3.2 First Launch</a></li>
+<li><a href="#33-preparation-before-creating-a-level">3.3 Preparation Before Creating a Level</a></li>
+</ul>
+</li>
+<li><a href="#4-operation-instructions">4. Operation Instructions</a>
+<ul>
+<li><a href="#41-menudialog-navigation">4.1 Menu/Dialog Navigation</a></li>
+<li><a href="#42-timeline-navigation">4.2 Timeline Navigation</a></li>
+<li><a href="#43-creating-rows-and-events">4.3 Creating Rows and Events</a></li>
+<li><a href="#44-edit-cursor">4.4 Edit Cursor</a></li>
+<li><a href="#45-quick-event-movement">4.5 Quick Event Movement</a></li>
+<li><a href="#46-editing-level-metadata">4.6 Editing Level Metadata</a></li>
+</ul>
+</li>
+<li><a href="#5-external-editor-rdeventeditorhelper">5. External Editor (RDEventEditorHelper)</a>
+<ul>
+<li><a href="#51-what-is-this">5.1 What is this?</a></li>
+<li><a href="#52-how-to-use">5.2 How to use?</a></li>
+</ul>
+</li>
+<li><a href="#6-known-issues-and-limitations">6. Known Issues and Limitations</a></li>
+<li><a href="#7-faq">7. FAQ</a>
+<ul>
+<li><a href="#why-isnt-the-mod-loading">Why isn't the mod loading?</a></li>
+<li><a href="#why-wont-the-helper-open">Why won't the helper open?</a></li>
+<li><a href="#why-does-the-game-freeze-after-the-save-dialog-pops-up">Why does the game freeze after the save dialog pops up?</a></li>
+<li><a href="#why-do-all-native-editor-shortcuts-stop-working-after-i-click-cancel-in-the-save-dialog-when-exiting-the-level-editor">Why do all native editor shortcuts stop working after I click cancel in the save dialog when exiting the level editor?</a></li>
+<li><a href="#whats-in-the-levels-folder">What's in the levels folder?</a></li>
+</ul>
+</li>
+<li><a href="#8-appendix">8. Appendix</a>
+<ul>
+<li><a href="#81-native-editor-common-shortcuts-reference">8.1 Native Editor Common Shortcuts Reference</a></li>
+<li><a href="#82-mod-shortcuts-reference">8.2 Mod Shortcuts Reference</a></li>
+<li><a href="#83-contact-information">8.3 Contact Information</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="0-tldr-version">0. TL;DR Version</h2>
+<p>If you don't like reading my <s>time-wasting nonsense</s> professional hardcore user manual, or if you prefer to explore on your own, here are some important sections. I think it's still better to read them.</p>
+<ul>
+<li><a href="#13-important-notes">1.3 Important Notes</a></li>
+<li><a href="#6-known-issues-and-limitations">6. Known Issues and Limitations</a></li>
+<li><a href="#8-appendix">8. Appendix</a></li>
+</ul>
+<h2 id="1-basic-introduction">1. Basic Introduction</h2>
+<h3 id="11-what-is-this">1.1 What is this?</h3>
+<p>That's a good question. This proves you've touched upon the most fundamental and important core concept of this project. So what exactly is it?</p>
+<p>Isn't that obvious? The name says it all. No need to ask such simple questions. What? You thought I would actually write the user manual in a serious and formal tone? No, no, no, that's not my style. If I really wanted to write seriously, I might as well let AI help me write it - it would do a better job than me anyway.</p>
+<p>Well, after my detailed introduction, I'm sure you already know what this project is for, so let's continue. <s>Actually, I didn't say anything at all</s></p>
+<h3 id="12-main-features">1.2 Main Features</h3>
+<ul>
+<li>No mouse required (full keyboard navigation support)</li>
+<li>Complete voice feedback (shares the same narration module as the native game)</li>
+<li>Provides Chinese and English localization support (automatically determined based on game settings)</li>
+<li>More to be added when I think of them</li>
+</ul>
+<h3 id="13-important-notes">1.3 Important Notes</h3>
+<p>To prevent you from thinking the manual is too long and not wanting to read it, I need to state some important notes upfront.</p>
+<ol>
+<li>This mod currently has certain limitations, especially for visual features (such as window dance, sprites, etc.) which are not yet fully supported.</li>
+<li>Although the mod is relatively stable, it's still recommended that you develop a habit of <strong>saving frequently</strong>. I've encountered inexplicable crashes before (see details <a href="#why-does-the-game-freeze-after-the-save-dialog-pops-up">here</a>), but fortunately I had this good habit. Well, I was forced to develop it.</li>
+</ol>
+<h2 id="2-installation">2. Installation</h2>
+<h3 id="21-system-requirements">2.1 System Requirements</h3>
+<ul>
+<li>Windows system (don't ask me which specific version, as long as the game can run, the mod should probably run too)</li>
+<li>Rhythm Doctor game (1.0+, standalone editor not supported)</li>
+<li>Your screen reader (this goes without saying)</li>
+</ul>
+<h3 id="22-installation-steps">2.2 Installation Steps</h3>
+<p>After extracting, besides this manual, you should see two folders: <strong>levels</strong> and <strong>main</strong>. Go into the main folder, select all, copy to the directory where your rhythm doctor.exe is located, and paste. That's it. The next time you run the game, the mod will run smoothly.</p>
+<p>You ask what's in the levels folder? Well, go in and see for yourself. Or wait for me to tell you later.</p>
+<h2 id="3-quick-start">3. Quick Start</h2>
+<h3 id="31-editor-basic-concepts">3.1 Editor Basic Concepts</h3>
+<p>Before really starting to explain how to use the mod, you need to understand some basic concepts of the native editor. I'm actually not very knowledgeable in this area either, so I'll just briefly summarize. If you don't want to read it, just skip ahead.</p>
+<h4 id="311-tabs">3.1.1 Tabs</h4>
+<p>There are six tabs in the editor, which can be switched by pressing number keys 1-6 on the main keyboard. They are: 1 Sounds, 2 Rows, 3 Actions, 4 Rooms, 5 Sprites, and 6 Windows. Each tab manages different types of events.</p>
+<h4 id="312-events">3.1.2 Events</h4>
+<p>You can think of events as instructions that tell the game what to do and when.</p>
+<p>Various actions in a level can be called events. For example, playing music, nurse voice prompts, various effects, dialogues, and various beats.</p>
+<h4 id="313-rows">3.1.3 Rows</h4>
+<p>Rows are equivalent to the “patients” you need to “treat”. All beat events occur on rows.</p>
+<h4 id="314-rooms">3.1.4 Rooms</h4>
+<p>Rooms are used to control screen splitting and layout display, somewhat similar to split-screen. A level can only have four rooms at the same time. Each room can only have a maximum of four rows. In other words, a level can have a maximum of 16 rows.</p>
+<h3 id="32-first-launch">3.2 First Launch</h3>
+<p>In the main menu, find <strong>Level Editor, this feature is still not compatible with narration.</strong>, and press enter to enter.</p>
+<p>Wait, didn't you say this mod makes it support narration? Well, don't worry about those details.</p>
+<p>Anyway, if this is your first time entering, you'll need to agree to a terms of service. Press down arrow to read it, then find agree and press enter. PS: Wait, what does this have to do with &quot;A Dance of Fire and Ice&quot;?</p>
+<p>Ahem, let's get back to the topic. When you press enter, you'll definitely notice that the music from level1 suddenly starts playing, but don't panic. This is because the editor loads a simple demo level by default when opening, and the level starts directly mainly because the game's operation keys conflict with the mod's. But it's not a big deal, it only happens occasionally with a few dialogs. You just need to calmly press P, and the level will pause. Or would you rather listen to the song?</p>
+<p>After agreeing to the terms, you can try pressing left and right arrows to browse the events in the current tab. However, this demo level only has three events, located in the Sounds, Rows, and Actions tabs. If you can hear the screen reader announce the event name and location, that proves you've successfully entered the editor.</p>
+<h3 id="33-preparation-before-creating-a-level">3.3 Preparation Before Creating a Level</h3>
+<p>If you can't wait to show off your skills and create a level, please don't rush. Before that, you need to understand the following preparation work:</p>
+<ol>
+<li>Create a new folder anywhere on your computer that you like.</li>
+<li>Put the music, sound effects, and other resources used in the level into this folder.</li>
+<li>In the editor, press ctrl+n to create a new level, and set the save location to the folder you just created.</li>
+<li>Alright, now you can start.</li>
+</ol>
+<h2 id="4-operation-instructions">4. Operation Instructions</h2>
+<h3 id="41-menudialog-navigation">4.1 Menu/Dialog Navigation</h3>
+<p>In any dialog/menu, you can press arrow keys to browse controls, and enter to confirm. Press tab to switch between clickable items.</p>
+<p>When in the level editor main interface, you can press f10 to open/close the editor's main menu. In this menu, you can create new levels, open levels, publish levels, and other operations. Of course, most of these operations have more convenient shortcuts, see the appendix.</p>
+<h3 id="42-timeline-navigation">4.2 Timeline Navigation</h3>
+<p>On the editing page, left/right arrow keys switch between events in the current tab, enter jumps to the event's location and plays, ctrl+enter edits event properties.</p>
+<p>However, there are two exceptions. When you're in the Rows or Sprites tab, you need to first press up/down arrows to switch to a row or sprite, then you can press left/right arrows to browse events. At the same time, you can also press shift+enter to edit rows. Editing sprites is not currently supported.</p>
+<h3 id="43-creating-rows-and-events">4.3 Creating Rows and Events</h3>
+<p>Press insert under a tab, and a menu will pop up listing the available event types for the current tab. Use up/down arrows to select, and press enter to create. After creation, the property editor will automatically open. If you're in the Rows tab, the created event will be placed on the currently selected row by default.</p>
+<p>In the Rows or Sprites tab, press ctrl+insert to create a new row or sprite, the operation is the same as creating an event.</p>
+<h3 id="44-edit-cursor">4.4 Edit Cursor</h3>
+<p>To make it more convenient for visually impaired players (actually, it's just me for now), the mod introduces the edit cursor feature. The edit cursor is a player-controllable temporary anchor point that doesn't move with playback and can be freely adjusted in position, making it convenient for players to quickly locate when creating events and other scenarios. Below are its shortcut key instructions.
+PS: I know some people definitely didn't understand the definition of edit cursor above, but trust me, after reading the shortcut key instructions you should understand... I hope...</p>
+<ul>
+<li>/ (slash), move the edit cursor to the current playback position</li>
+<li>shift+slash, announce the current position of the edit cursor</li>
+<li>ctrl+slash, snap the edit cursor to the nearest half beat</li>
+<li>alt+slash, jump to the edit cursor's position and start playing</li>
+<li>, (comma), move the edit cursor forward by 1 beat (add shift for 0.1 beat, add alt for 0.01 beat)</li>
+<li>. (period), move the edit cursor backward by 1 beat (add shift for 0.1 beat, add alt for 0.01 beat)</li>
+</ul>
+<p>In addition to quick jumping, the edit cursor's applicable scope also includes:</p>
+<ul>
+<li>The default position for newly created events</li>
+<li>The target position when pasting events</li>
+<li>More scenarios to be expanded in the future</li>
+</ul>
+<h3 id="45-quick-event-movement">4.5 Quick Event Movement</h3>
+<p>If you don't want to press ctrl+enter just to fine-tune an event's position, the mod also provides simple adjustment shortcuts. This set of shortcuts, aside from different keys and different adjustment targets, has a lot in common with the edit cursor. As follows:</p>
+<ul>
+<li>z, move event forward by 1 beat (also supports shift or alt modifier keys)</li>
+<li>x, move event backward by 1 beat (also supports shift or alt modifier keys)</li>
+<li>c, snap event to the nearest half beat</li>
+</ul>
+<p>Note 1: If the selected event doesn't have a beat property, pressing z and x will change to moving forward/backward by 1 bar, and modifier keys are not supported.</p>
+<p>Note 2: The above shortcuts are effective for all selected events.</p>
+<p>Note 3: If the selected events include both events with beat properties and events without beat properties, they cannot be moved.</p>
+<h3 id="46-editing-level-metadata">4.6 Editing Level Metadata</h3>
+<p>On the main page, you can press number key 0 on the main keyboard at any time to open the metadata editing page. Here you can edit some basic information about the level.</p>
+<h2 id="5-external-editor-rdeventeditorhelper">5. External Editor (RDEventEditorHelper)</h2>
+<h3 id="51-what-is-this">5.1 What is this?</h3>
+<p>Because the official inspector panel is quite complex and troublesome to adapt, I simply made a separate external editor. This editor is completely rendered using Windows native UI, so screen readers can operate it very conveniently. It is currently used to edit events, rows, and metadata.</p>
+<h3 id="52-how-to-use">5.2 How to use?</h3>
+<p>When you select an event or row in the level editor, or press number key 0 on the main keyboard, the helper will launch. It will generate UI based on the object currently being edited, and you can directly use the screen reader to navigate between properties. After editing is complete, just click the OK button to apply it to the game. If you want to abandon the edit, just press esc or click the Cancel button.</p>
+<h2 id="6-known-issues-and-limitations">6. Known Issues and Limitations</h2>
+<p>Since this is only the first version, there are still many features waiting to be improved. The following lists currently known issues and limitations. The issues in the list will be attempted to be resolved one by one in future versions.</p>
+<p>But then again, I hope the official version will support accessibility soon, so this mod won't need v1.1+.</p>
+<ol>
+<li>Most events under the Rooms tab are generally poorly supported, and many properties cannot be edited.</li>
+<li>The Sprites tab is even more out of the question.</li>
+<li>Window dance? What's that?</li>
+<li>Some custom options are not supported (such as custom characters).</li>
+<li>Some metadata cannot be edited yet (such as rating text).</li>
+<li>Bookmark functionality is not supported.</li>
+<li>Event multi-selection support is not flexible enough.</li>
+<li>The helper's browse file button currently seems to be useless. It won't help you copy files to the level directory.</li>
+<li>Since a separate property editor was written, the operation should not be as smooth as the original version (although I don't know exactly how smooth the original version is).</li>
+</ol>
+<h2 id="7-faq">7. FAQ</h2>
+<h3 id="why-isnt-the-mod-loading">Why isn't the mod loading?</h3>
+<p>Please make sure your execution steps are: enter the main folder, select all and copy, paste in the game's main program directory, rather than directly copying the entire main folder over.</p>
+<h3 id="why-wont-the-helper-open">Why won't the helper open?</h3>
+<p>If you're just randomly trying to open it by pressing enter, it's perfectly normal that it won't open; if you can't open it when you want to edit an event in the game, and there's an error dialog, please download
+<a href="https://dotnet.microsoft.com/download/dotnet-framework/net48">.NET Framework 4.8</a>
+and try installing it.</p>
+<h3 id="why-does-the-game-freeze-after-the-save-dialog-pops-up">Why does the game freeze after the save dialog pops up?</h3>
+<p>This is a low-probability event, and I'm not sure what the problem is. This is why I mentioned earlier about developing the good habit of saving frequently. If you have this habit, then you're lucky; if not...</p>
+<h3 id="why-do-all-native-editor-shortcuts-stop-working-after-i-click-cancel-in-the-save-dialog-when-exiting-the-level-editor">Why do all native editor shortcuts stop working after I click cancel in the save dialog when exiting the level editor?</h3>
+<p>After my testing, this seems to be a problem with the game itself? Because I tried the same operation without running the mod, and the problem can still be reproduced. You can only press alt+f4, then save or discard, exit the game and re-enter to solve it. But this is much better than the previous situation, isn't it?</p>
+<h3 id="whats-in-the-levels-folder">What's in the levels folder?</h3>
+<p>Inside is a demo level I made myself using this mod. Feel free to import it and play around with it. What? You ask me why I added an 's' to the folder name when there's only one level? Because I want to, is that not okay?</p>
+<h2 id="8-appendix">8. Appendix</h2>
+<h3 id="81-native-editor-common-shortcuts-reference">8.1 Native Editor Common Shortcuts Reference</h3>
+<p>Note: This only lists some commonly used shortcuts, not a complete list. If you want to see a more complete one, it's better to look for official documentation.</p>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Function</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ctrl+n</td>
+<td>New level</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+o</td>
+<td>Open level</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+shift+o</td>
+<td>Open last edited level</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+u</td>
+<td>Open URL</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+s</td>
+<td>Save</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+shift+s</td>
+<td>Save as</td>
+<td>Strange, why doesn't it work for me?</td>
+</tr>
+<tr>
+<td>ctrl+shift+r</td>
+<td>Run current level as standalone</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+shift+p</td>
+<td>Export for publishing</td>
+<td>None</td>
+</tr>
+<tr>
+<td>alt+s</td>
+<td>Level editor settings</td>
+<td>None</td>
+</tr>
+<tr>
+<td>alt+q</td>
+<td>Exit</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+z</td>
+<td>Undo</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+shift+z/ctrl+y</td>
+<td>Redo</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+x</td>
+<td>Cut</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+c</td>
+<td>Copy</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+v</td>
+<td>Paste</td>
+<td>The original game behavior is to paste at the center of the view, the mod changes it to paste at the edit cursor.</td>
+</tr>
+<tr>
+<td>ctrl+b/ctrl+shift+v</td>
+<td>Paste to next bar</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+d</td>
+<td>Clone selected event</td>
+<td>None</td>
+</tr>
+<tr>
+<td>a</td>
+<td>Toggle auto mode</td>
+<td>None</td>
+</tr>
+<tr>
+<td>f</td>
+<td>Toggle fullscreen</td>
+<td>In fullscreen mode, the timeline is hidden, mainly used for previewing levels. In this state, the edit cursor may not work as expected.</td>
+</tr>
+<tr>
+<td>m</td>
+<td>Toggle metronome</td>
+<td>None</td>
+</tr>
+<tr>
+<td>p</td>
+<td>Play/Pause</td>
+<td>None</td>
+</tr>
+<tr>
+<td>delete/backspace</td>
+<td>Delete selected event</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Number keys 1-6</td>
+<td>Switch between six different tabs</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+Number keys 1-4</td>
+<td>Switch to different rooms</td>
+<td>If currently in another tab, will automatically switch to the Rows tab.</td>
+</tr>
+<tr>
+<td>home</td>
+<td>Return to level start</td>
+<td>None</td>
+</tr>
+<tr>
+<td>pageup/pagedown</td>
+<td>Rewind/Fast forward?</td>
+<td>I personally don't find it very useful.</td>
+</tr>
+<tr>
+<td>shift+home</td>
+<td>Select all events before the currently selected event in the current tab (or row)</td>
+<td>I know this is a bit convoluted.</td>
+</tr>
+<tr>
+<td>shift+end</td>
+<td>Select all events after the currently selected event in the current tab (or row)</td>
+<td>I also know this is convoluted too.</td>
+</tr>
+<tr>
+<td>ctrl+shift+home</td>
+<td>Select all events before the currently selected event</td>
+<td>This is much better.</td>
+</tr>
+<tr>
+<td>ctrl+shift+end</td>
+<td>Select all events after the currently selected event</td>
+<td>This too.</td>
+</tr>
+<tr>
+<td>esc</td>
+<td>Exit Full Screen/Deselect</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-mod-shortcuts-reference">8.2 Mod Shortcuts Reference</h3>
+<table>
+<thead>
+<tr>
+<th>Shortcut</th>
+<th>Function</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>f10</td>
+<td>Open/close editor main menu</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Left/Right arrows</td>
+<td>Browse events in current tab (or row)</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Up/Down arrows</td>
+<td>Switch rows/sprites in Rows/Sprites tab</td>
+<td>None</td>
+</tr>
+<tr>
+<td>enter</td>
+<td>Jump to selected event's position and start playing</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+enter</td>
+<td>Open helper to edit event</td>
+<td>None</td>
+</tr>
+<tr>
+<td>shift+enter</td>
+<td>Open helper to edit row</td>
+<td>None</td>
+</tr>
+<tr>
+<td>Number key 0</td>
+<td>Open helper to edit metadata</td>
+<td>None</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>Insert event at edit cursor</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+insert</td>
+<td>Add row/sprite to room (only valid in Rows/Sprites tab)</td>
+<td>None</td>
+</tr>
+<tr>
+<td>/ (slash)</td>
+<td>Move edit cursor to playhead position</td>
+<td>None</td>
+</tr>
+<tr>
+<td>shift+/</td>
+<td>Announce edit cursor's current position</td>
+<td>None</td>
+</tr>
+<tr>
+<td>ctrl+/</td>
+<td>Snap edit cursor to nearest half beat</td>
+<td>None</td>
+</tr>
+<tr>
+<td>alt+slash</td>
+<td>Jump to edit cursor's position and start playing</td>
+<td>None</td>
+</tr>
+<tr>
+<td>, (comma) and . (period)</td>
+<td>Move edit cursor forward/backward by 1 beat</td>
+<td>Add shift for 0.1 beat, add alt for 0.01 beat.</td>
+</tr>
+<tr>
+<td>z/x</td>
+<td>Move selected event forward/backward by 1 beat (or 1 bar)</td>
+<td>Add shift for 0.1 beat, add alt for 0.01 beat. See <a href="#45-quick-event-movement">4.5 Quick Event Movement</a> for details.</td>
+</tr>
+<tr>
+<td>c</td>
+<td>Snap event to nearest half beat</td>
+<td>None</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-contact-information">8.3 Contact Information</h3>
+<p>Email: <a href="mailto:huangzitong94@gmail.com">huangzitong94@gmail.com</a></p>
+<p>QQ: 1528344627</p>
+
+            
+            
+        </body>
+        </html>

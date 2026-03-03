@@ -371,3 +371,6 @@ RDLevelEditorAccess/IPC/tmpclaude-*-cwd
 
 # Claude Code 项目数据目录
 .claude/
+
+# Release 文件夹（编译产物）
+release/

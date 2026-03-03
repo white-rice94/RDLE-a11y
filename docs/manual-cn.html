@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>rhythm doctor &#x5173;&#x5361;&#x7f16;&#x8f91;&#x5668;&#x65e0;&#x969c;&#x788d;mod&#x7528;&#x6237;&#x624b;&#x518c;</title>
+            <style>
+/* From extension vscode.github */
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.vscode-dark img[src$=\#gh-light-mode-only],
+.vscode-light img[src$=\#gh-dark-mode-only],
+.vscode-high-contrast:not(.vscode-high-contrast-light) img[src$=\#gh-light-mode-only],
+.vscode-high-contrast-light img[src$=\#gh-dark-mode-only] {
+	display: none;
+}
+
+</style>
+            
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/markdown.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Microsoft/vscode/extensions/markdown-language-features/media/highlight.css">
+<style>
+            body {
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
+                font-size: 14px;
+                line-height: 1.6;
+            }
+        </style>
+        <style>
+.task-list-item {
+    list-style-type: none;
+}
+
+.task-list-item-checkbox {
+    margin-left: -20px;
+    vertical-align: middle;
+    pointer-events: none;
+}
+</style>
+<style>
+:root {
+  --color-note: #0969da;
+  --color-tip: #1a7f37;
+  --color-warning: #9a6700;
+  --color-severe: #bc4c00;
+  --color-caution: #d1242f;
+  --color-important: #8250df;
+}
+
+</style>
+<style>
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-note: #2f81f7;
+    --color-tip: #3fb950;
+    --color-warning: #d29922;
+    --color-severe: #db6d28;
+    --color-caution: #f85149;
+    --color-important: #a371f7;
+  }
+}
+
+</style>
+<style>
+.markdown-alert {
+  padding: 0.5rem 1rem;
+  margin-bottom: 16px;
+  color: inherit;
+  border-left: .25em solid #888;
+}
+
+.markdown-alert>:first-child {
+  margin-top: 0
+}
+
+.markdown-alert>:last-child {
+  margin-bottom: 0
+}
+
+.markdown-alert .markdown-alert-title {
+  display: flex;
+  font-weight: 500;
+  align-items: center;
+  line-height: 1
+}
+
+.markdown-alert .markdown-alert-title .octicon {
+  margin-right: 0.5rem;
+  display: inline-block;
+  overflow: visible !important;
+  vertical-align: text-bottom;
+  fill: currentColor;
+}
+
+.markdown-alert.markdown-alert-note {
+  border-left-color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-note .markdown-alert-title {
+  color: var(--color-note);
+}
+
+.markdown-alert.markdown-alert-important {
+  border-left-color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-important .markdown-alert-title {
+  color: var(--color-important);
+}
+
+.markdown-alert.markdown-alert-warning {
+  border-left-color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-warning .markdown-alert-title {
+  color: var(--color-warning);
+}
+
+.markdown-alert.markdown-alert-tip {
+  border-left-color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-tip .markdown-alert-title {
+  color: var(--color-tip);
+}
+
+.markdown-alert.markdown-alert-caution {
+  border-left-color: var(--color-caution);
+}
+
+.markdown-alert.markdown-alert-caution .markdown-alert-title {
+  color: var(--color-caution);
+}
+
+</style>
+        
+        </head>
+        <body class="vscode-body vscode-light">
+            <h1 id="rhythm-doctor-关卡编辑器无障碍mod用户手册">rhythm doctor 关卡编辑器无障碍mod用户手册</h1>
+<hr>
+<h2 id="目录">目录</h2>
+<ul>
+<li><a href="#rhythm-doctor-%E5%85%B3%E5%8D%A1%E7%BC%96%E8%BE%91%E5%99%A8%E6%97%A0%E9%9A%9C%E7%A2%8Dmod%E7%94%A8%E6%88%B7%E6%89%8B%E5%86%8C">rhythm doctor 关卡编辑器无障碍mod用户手册</a>
+<ul>
+<li><a href="#%E7%9B%AE%E5%BD%95">目录</a></li>
+<li><a href="#0-%E5%A4%AA%E9%95%BF%E4%B8%8D%E7%9C%8B%E7%89%88">0. 太长不看版</a></li>
+<li><a href="#1-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D">1. 基本介绍</a>
+<ul>
+<li><a href="#11-%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88">1.1 这是什么？</a></li>
+<li><a href="#12-%E4%B8%BB%E8%A6%81%E7%89%B9%E7%82%B9">1.2 主要特点</a></li>
+<li><a href="#13-%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">1.3 注意事项</a></li>
+</ul>
+</li>
+<li><a href="#2-%E5%AE%89%E8%A3%85">2. 安装</a>
+<ul>
+<li><a href="#21-%E7%B3%BB%E7%BB%9F%E8%A6%81%E6%B1%82">2.1 系统要求</a></li>
+<li><a href="#22-%E5%AE%89%E8%A3%85%E6%AD%A5%E9%AA%A4">2.2 安装步骤</a></li>
+</ul>
+</li>
+<li><a href="#3-%E5%BF%AB%E9%80%9F%E5%85%A5%E9%97%A8">3. 快速入门</a>
+<ul>
+<li><a href="#31-%E7%BC%96%E8%BE%91%E5%99%A8%E5%9F%BA%E7%A1%80%E6%A6%82%E5%BF%B5">3.1 编辑器基础概念</a>
+<ul>
+<li><a href="#311-%E6%A0%87%E7%AD%BE%E9%A1%B5">3.1.1 标签页</a></li>
+<li><a href="#312-%E4%BA%8B%E4%BB%B6">3.1.2 事件</a></li>
+<li><a href="#313-%E8%BD%A8%E9%81%93">3.1.3 轨道</a></li>
+<li><a href="#314-%E6%88%BF%E9%97%B4">3.1.4 房间</a></li>
+</ul>
+</li>
+<li><a href="#32-%E9%A6%96%E6%AC%A1%E5%90%AF%E5%8A%A8">3.2 首次启动</a></li>
+<li><a href="#33-%E6%96%B0%E5%BB%BA%E5%85%B3%E5%8D%A1%E5%89%8D%E7%9A%84%E5%87%86%E5%A4%87%E5%B7%A5%E4%BD%9C">3.3 新建关卡前的准备工作</a></li>
+</ul>
+</li>
+<li><a href="#4-%E6%93%8D%E4%BD%9C%E8%AF%B4%E6%98%8E">4. 操作说明</a>
+<ul>
+<li><a href="#41-%E8%8F%9C%E5%8D%95%E5%AF%B9%E8%AF%9D%E6%A1%86%E5%AF%BC%E8%88%AA">4.1 菜单/对话框导航</a></li>
+<li><a href="#42-%E6%97%B6%E9%97%B4%E8%BD%B4%E5%AF%BC%E8%88%AA">4.2 时间轴导航</a></li>
+<li><a href="#43-%E6%96%B0%E5%BB%BA%E8%BD%A8%E9%81%93%E5%92%8C%E4%BA%8B%E4%BB%B6">4.3 新建轨道和事件</a></li>
+<li><a href="#44-%E7%BC%96%E8%BE%91%E5%85%89%E6%A0%87">4.4 编辑光标</a></li>
+<li><a href="#45-%E5%BF%AB%E6%8D%B7%E7%A7%BB%E5%8A%A8%E4%BA%8B%E4%BB%B6">4.5 快捷移动事件</a></li>
+<li><a href="#46-%E7%BC%96%E8%BE%91%E5%85%B3%E5%8D%A1%E5%85%83%E6%95%B0%E6%8D%AE">4.6 编辑关卡元数据</a></li>
+</ul>
+</li>
+<li><a href="#5-%E5%A4%96%E9%83%A8%E7%BC%96%E8%BE%91%E5%99%A8rdeventeditorhelper">5. 外部编辑器（RDEventEditorHelper）</a>
+<ul>
+<li><a href="#51-%E8%BF%99%E6%98%AF%E4%BB%80%E4%B9%88">5.1 这是什么？</a></li>
+<li><a href="#52-%E6%80%8E%E4%B9%88%E7%94%A8">5.2 怎么用？</a></li>
+</ul>
+</li>
+<li><a href="#6-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98%E4%B8%8E%E5%B1%80%E9%99%90">6. 已知问题与局限</a></li>
+<li><a href="#7-%E5%B8%B8%E8%A7%81%E9%97%AE%E9%A2%98">7. 常见问题</a>
+<ul>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88mod%E6%B2%A1%E6%9C%89%E5%8A%A0%E8%BD%BD">为什么mod没有加载？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88helper%E6%89%93%E4%B8%8D%E5%BC%80">为什么helper打不开？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%97%AE%E6%88%91%E6%98%AF%E5%90%A6%E4%BF%9D%E5%AD%98%E7%9A%84%E5%AF%B9%E8%AF%9D%E6%A1%86%E5%BC%B9%E5%87%BA%E6%9D%A5%E4%B9%8B%E5%90%8E%E7%9B%B4%E6%8E%A5%E5%8D%A1%E6%AD%BB%E4%BA%86">为什么问我是否保存的对话框弹出来之后直接卡死了？</a></li>
+<li><a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%88%91%E9%80%80%E5%87%BA%E5%85%B3%E5%8D%A1%E7%BC%96%E8%BE%91%E5%99%A8%E7%9A%84%E6%97%B6%E5%80%99%E5%9C%A8%E6%98%AF%E5%90%A6%E4%BF%9D%E5%AD%98%E7%9A%84%E5%AF%B9%E8%AF%9D%E6%A1%86%E9%87%8C%E7%82%B9%E4%BA%86%E5%8F%96%E6%B6%88%E7%BB%93%E6%9E%9C%E6%89%80%E6%9C%89%E7%BC%96%E8%BE%91%E5%99%A8%E5%8E%9F%E7%94%9F%E5%BF%AB%E6%8D%B7%E9%94%AE%E5%85%A8%E9%83%A8%E5%A4%B1%E7%81%B5%E4%BA%86">为什么我退出关卡编辑器的时候，在是否保存的对话框里点了取消，结果所有编辑器原生快捷键全部失灵了？</a></li>
+<li><a href="#levels%E6%96%87%E4%BB%B6%E5%A4%B9%E9%87%8C%E7%9A%84%E6%98%AF%E4%BB%80%E4%B9%88">levels文件夹里的是什么？</a></li>
+</ul>
+</li>
+<li><a href="#8-%E9%99%84%E5%BD%95">8. 附录</a>
+<ul>
+<li><a href="#81-%E5%8E%9F%E7%94%9F%E7%BC%96%E8%BE%91%E5%99%A8%E5%B8%B8%E7%94%A8%E5%BF%AB%E6%8D%B7%E9%94%AE%E4%B8%80%E8%A7%88%E8%A1%A8">8.1 原生编辑器常用快捷键一览表</a></li>
+<li><a href="#82-mod%E5%BF%AB%E6%8D%B7%E9%94%AE%E4%B8%80%E8%A7%88%E8%A1%A8">8.2 mod快捷键一览表</a></li>
+<li><a href="#83-%E8%81%94%E7%B3%BB%E6%96%B9%E5%BC%8F">8.3 联系方式</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<hr>
+<h2 id="0-太长不看版">0. 太长不看版</h2>
+<p>如果你不喜欢看我这些<s>浪费时间的废话</s>专业硬核的用户手册，或者你更想自己探索，那么这里为你整理了一些比较重要的内容。我觉得最好还是看看比较好。</p>
+<ul>
+<li><a href="#13-%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9">1.3 注意事项</a></li>
+<li><a href="#6-%E5%B7%B2%E7%9F%A5%E9%97%AE%E9%A2%98%E4%B8%8E%E5%B1%80%E9%99%90">6. 已知问题与局限</a></li>
+<li><a href="#8-%E9%99%84%E5%BD%95">8. 附录</a></li>
+</ul>
+<h2 id="1-基本介绍">1. 基本介绍</h2>
+<h3 id="11-这是什么">1.1 这是什么？</h3>
+<p>这个问题问得好。这证明你已经触及到了这个项目最底层，同时也是最重要的核心理念。那么它究竟是什么呢？</p>
+<p>这不废话吗，名字都写的那么清楚了，这种简单的问题就不用问了吧。什么？你以为我真的会认认真真用一本正经的语言来写用户手册吗？不不不，这不是我的风格。我要是真想一本正经的写，那还不如让ai帮我写呢，那种东西我写的又不如它好。</p>
+<p>嗯，经过我详细的介绍，相信你肯定已经知道这个项目是干嘛的了，那我们就继续往下看吧。<s>其实好像根本什么都没说</s></p>
+<h3 id="12-主要特点">1.2 主要特点</h3>
+<ul>
+<li>无需鼠标（全程支持键盘导航）</li>
+<li>完整的语音反馈（与游戏原生共用相同的narration模块）</li>
+<li>提供中文和英文的本地化支持（根据游戏设置自动判断）</li>
+<li>想到了再补充</li>
+</ul>
+<h3 id="13-注意事项">1.3 注意事项</h3>
+<p>防止你觉得手册太长懒得看，所以有些注意事项我得事先声明一下。</p>
+<ol>
+<li>本mod目前存在一定局限性，特别是对视觉方面的功能（例如window dance、精灵等）的支持还不完善。</li>
+<li>虽然mod已经相对较为稳定，但依然建议你养成<strong>随手保存</strong>的习惯。我曾经遇到过莫名崩溃的情况（详情请看<a href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%97%AE%E6%88%91%E6%98%AF%E5%90%A6%E4%BF%9D%E5%AD%98%E7%9A%84%E5%AF%B9%E8%AF%9D%E6%A1%86%E5%BC%B9%E5%87%BA%E6%9D%A5%E4%B9%8B%E5%90%8E%E7%9B%B4%E6%8E%A5%E5%8D%A1%E6%AD%BB%E4%BA%86">这里</a>），但还好我有这个好习惯。哎，都是被逼的。</li>
+</ol>
+<h2 id="2-安装">2. 安装</h2>
+<h3 id="21-系统要求">2.1 系统要求</h3>
+<ul>
+<li>windows系统（别问我具体是什么版本，只要游戏能跑的起来mod大概也能跑得起来）</li>
+<li>rhythm doctor游戏本体（1.0+，不支持独立版编辑器）</li>
+<li>你的屏幕阅读器（这个不必多说）</li>
+</ul>
+<h3 id="22-安装步骤">2.2 安装步骤</h3>
+<p>解压开之后，你除了看到这个手册之外，应该还能看到两个文件夹，分别是<strong>levels</strong>和<strong>main</strong>。点进main文件夹，全选复制到你的rhythm doctor.exe所在目录粘贴就搞定了。下次运行游戏的时候，mod就可以顺利运行了。</p>
+<p>你问levels文件夹里是什么？嗯，你自己进去看看就知道了。或者等我后面告诉你。</p>
+<h2 id="3-快速入门">3. 快速入门</h2>
+<h3 id="31-编辑器基础概念">3.1 编辑器基础概念</h3>
+<p>在真正开始讲mod的使用方法之前，得先了解一些原生编辑器的基本概念。在这一方面我其实也不是很懂，所以就简单概括一下。不想看的话就直接跳过吧。</p>
+<h4 id="311-标签页">3.1.1 标签页</h4>
+<p>编辑器中一共有六个标签页，可以按大键盘1-6来切换。它们分别为：1 声音（sounds）、2 轨道（rows）、3 动作（actions）、4 房间（rooms）、5 精灵（sprites）和6 窗口（windows）。每个标签页分别管理不同类型的事件。</p>
+<h4 id="312-事件">3.1.2 事件</h4>
+<p>你可以把事件理解为告诉游戏什么时候该干什么的一条条指令。</p>
+<p>关卡中的各种动作都可以称之为事件。例如播放音乐、护士语音提示，以及各种特效、对话，还有各种节拍等。</p>
+<h4 id="313-轨道">3.1.3 轨道</h4>
+<p>轨道就相当于你需要“治疗”的“病人”。所有的节拍事件都发生在轨道上。</p>
+<h4 id="314-房间">3.1.4 房间</h4>
+<p>房间用于控制画面的分割和布局显示，有点类似于分屏。一个关卡内只能同时存在四个房间。每个房间内只能有最多四条轨道。也就是说，一个关卡内最多只能有16条轨道。</p>
+<h3 id="32-首次启动">3.2 首次启动</h3>
+<p>在主菜单中找到<strong>关卡编辑器，此功能还没有兼容朗读。</strong>，enter进入。</p>
+<p>等等，不是说这个mod能让它支持朗读吗？嗯，不要在意那些细节。</p>
+<p>总之，如果你是首次进入，会需要你同意一个协议。下光标读读看，然后找到同意enter就好了。ps：不是，这跟《冰与火之舞》有什么关系啊？</p>
+<p>咳咳，我们还是说回正题吧。在你敲下enter的时候，你一定发现level1的音乐忽然就响了起来对吧，但是你先别慌，这是因为打开编辑器的时候会默认加载一个简单的演示关卡，而导致关卡直接启动主要是因为游戏的操作按键与mod的发生冲突了，不过影响不大，也就偶尔几个对话框会有这种情况而已。你只要淡定的按一下p，关卡就暂停了。或者你更想听听歌？</p>
+<p>同意协议之后，你可以尝试按左右光标浏览一下当前标签页的事件。不过这个演示关卡只有三个事件而已，分别在声音、轨道和动作这三个标签页中。如果你能听到屏幕阅读器读出事件名称和所在位置，那就证明你已经成功进入了编辑器。</p>
+<h3 id="33-新建关卡前的准备工作">3.3 新建关卡前的准备工作</h3>
+<p>如果你这就忍不住想大展身手创建个关卡玩玩了，请先不要急。在此之前，你还需要了解以下准备工作：</p>
+<ol>
+<li>在你的电脑上任何一个你看得顺眼的地方新建一个文件夹。</li>
+<li>在编辑器里按ctrl+n新建关卡，并把关卡保存位置设置为你刚刚创建的那个文件夹。</li>
+<li>好了，这下可以开始了。</li>
+</ol>
+<h2 id="4-操作说明">4. 操作说明</h2>
+<h3 id="41-菜单对话框导航">4.1 菜单/对话框导航</h3>
+<p>在任何对话框/菜单中，可以按光标键浏览控件，enter确定。按tab可以在可点击的项目之间切换。</p>
+<p>处于关卡编辑器主界面时，可以按f10打开/关闭编辑器的主菜单。在该菜单中，可以进行新建关卡、打开关卡、发布关卡等操作。当然，这些操作基本都有更方便的快捷键，参见附录。</p>
+<h3 id="42-时间轴导航">4.2 时间轴导航</h3>
+<p>在编辑页面，左/右光标键在当前标签页中的事件之间切换，enter跳转到事件所在的位置并播放，ctrl+enter编辑事件属性。</p>
+<p>不过，这里有两个例外。当你处于轨道或者精灵标签页时，你需要先按上下光标切换到一条轨道或者精灵，才能按左右光标浏览事件。同时，也可以按shift+enter来编辑轨道。暂时不支持编辑精灵。</p>
+<h3 id="43-新建轨道和事件">4.3 新建轨道和事件</h3>
+<p>在某个标签页下按insert，会弹出一个菜单，列出当前标签页下可用的事件类型。使用上下光标选择，enter确定即可创建。创建后会自动打开属性编辑器。如果处于轨道标签页，创建的事件会默认放在当前选中的轨道上。</p>
+<p>在轨道或精灵标签页下，按ctrl+insert可以新建轨道或精灵，操作方式同创建事件。</p>
+<h3 id="44-编辑光标">4.4 编辑光标</h3>
+<p>为了更方便视障玩家（其实目前就只有我自己）的使用，mod引入了编辑光标的特性。编辑光标是一个玩家可控的临时锚点，不会随着播放而移动，且可以自由调整位置，方便玩家在创建事件等场景下快速定位。以下是它的快捷键说明。
+ps：我知道有的人看上面那个编辑光标的定义肯定没看懂，不过相信我，看完快捷键说明你应该就能懂了……吧……</p>
+<ul>
+<li>/（斜杠），将编辑光标移动到当前的播放位置</li>
+<li>shift+斜杠，朗读编辑光标当前的所在位置</li>
+<li>ctrl+斜杠，将编辑光标吸附到最近的半拍</li>
+<li>ctrl+shift+斜杠，打开编辑光标跳转对话框</li>
+<li>alt+斜杠，跳转到编辑光标所在位置并开始播放</li>
+<li>,（逗号），编辑光标前移1拍（加shift为0.1拍，加alt为0.01拍，加shift和alt为1小节）</li>
+<li>.（句号），编辑光标后移1拍（加shift为0.1拍，加alt为0.01拍，加shift和alt为1小节）</li>
+</ul>
+<p>除了实现快速跳转，编辑光标的适用范围还包括：</p>
+<ul>
+<li>新创建的事件的默认位置</li>
+<li>粘贴事件时的目标位置</li>
+<li>更多场景有待未来扩展</li>
+</ul>
+<h3 id="45-快捷移动事件">4.5 快捷移动事件</h3>
+<p>如果你不想只是微调个事件位置也要按ctrl+enter的话，mod也提供了简单的调节快捷键。这一组快捷键除了按键不同，调整的对象不同之外，和编辑光标有很多的共同点。如下：</p>
+<ul>
+<li>z，事件前移1拍（同样支持修饰键）</li>
+<li>x，事件后移1拍（同样支持修饰键）</li>
+<li>c，将事件吸附到最近的半拍</li>
+</ul>
+<p>注1：如果选中的事件没有节拍属性，则按z和x的行为改为前移/后移1小节，且不支持修饰键。</p>
+<p>注2：以上快捷键对所有选中的事件有效。</p>
+<p>注3：如果选中的事件同时包含有节拍属性和无节拍属性的事件，则无法移动。</p>
+<h3 id="46-编辑关卡元数据">4.6 编辑关卡元数据</h3>
+<p>在主页面中随时可以按大键盘数字0打开元数据编辑页面。在这里可以编辑关卡的一些基本信息。</p>
+<h2 id="5-外部编辑器rdeventeditorhelper">5. 外部编辑器（RDEventEditorHelper）</h2>
+<h3 id="51-这是什么">5.1 这是什么？</h3>
+<p>由于官方的检查器面板比较复杂，适配起来比较麻烦，所以干脆另外做了个独立的外部编辑器。这个编辑器完全是使用windows原生ui渲染的，因此屏幕阅读器可以很方便的操作。它目前被用于编辑事件、轨道和元数据。</p>
+<h3 id="52-怎么用">5.2 怎么用？</h3>
+<p>当你在关卡编辑器里选择了一个事件、轨道，或者按下大键盘数字0的时候，helper就会启动。它会根据当前正在编辑的对象生成ui，你可以直接用屏幕阅读器在各个属性之间导航。编辑完成后，直接点击确定按钮即可应用到游戏中。如果想放弃编辑，直接按esc或者点击取消按钮即可。</p>
+<h2 id="6-已知问题与局限">6. 已知问题与局限</h2>
+<p>由于这只是第一个版本，还有很多功能等待完善。以下列出的是目前已知的问题与局限。列表中的问题在未来的版本中将一一尝试解决。</p>
+<p>不过话又说回来，希望官方早日支持无障碍，这样的话，这个mod就可以不用有v1.1+了。</p>
+<ol>
+<li>房间标签页下的大部分事件支持的都很一般，许多属性都无法编辑。</li>
+<li>精灵标签页更是想都别想。</li>
+<li>window dance？那是什么东西？补充：我看了一下，貌似是可以编辑，但是我反正也看不到，有没有起作用我也不知道啊。</li>
+<li>部分自定义选项不支持（例如自定义角色）。</li>
+<li>部分元数据还不支持编辑（例如评价文本）。</li>
+<li>书签功能不支持。</li>
+<li>事件多选支持不够灵活。</li>
+<li>由于另外写了属性编辑器，因此操作上应该没有原版的丝滑（虽然我也不知道原版具体有多丝滑）。</li>
+</ol>
+<h2 id="7-常见问题">7. 常见问题</h2>
+<h3 id="为什么mod没有加载">为什么mod没有加载？</h3>
+<p>请确保你的执行步骤是进入main文件夹，全选复制，到游戏主程序所在目录下粘贴，而不是直接把整个main文件夹复制过去。</p>
+<h3 id="为什么helper打不开">为什么helper打不开？</h3>
+<p>如果你是自己闲着没事去enter打开它，它打不开纯属正常现象；如果你是在游戏中想要编辑事件的时候打不开，而且有报错对话框，请去下个
+<a href="https://dotnet.microsoft.com/download/dotnet-framework/net48">.NET Framework 4.8</a>
+装上试试看。</p>
+<h3 id="为什么问我是否保存的对话框弹出来之后直接卡死了">为什么问我是否保存的对话框弹出来之后直接卡死了？</h3>
+<p>这是个小概率事件，我不确定是什么问题。这就是我前面说的养成随时保存的好习惯的原因。如果你有这个习惯，那么你很幸运；如果没有……</p>
+<h3 id="为什么我退出关卡编辑器的时候在是否保存的对话框里点了取消结果所有编辑器原生快捷键全部失灵了">为什么我退出关卡编辑器的时候，在是否保存的对话框里点了取消，结果所有编辑器原生快捷键全部失灵了？</h3>
+<p>经过我的测试，这似乎是游戏本身的问题？因为我尝试过在不运行mod的情况下进行相同操作，问题也能复现。你只能按alt+f4，然后保存或者丢弃，退出游戏重新进入才能解决。不过这比上一种状况好太多了不是吗？</p>
+<h3 id="levels文件夹里的是什么">levels文件夹里的是什么？</h3>
+<p>里面放了一个我自己用这个mod做的演示关卡，欢迎你顺手导入进去玩一玩看一看。什么？你问我为什么明明只有一个level还要在文件夹名后面加s？我乐意，不行吗？</p>
+<h2 id="8-附录">8. 附录</h2>
+<h3 id="81-原生编辑器常用快捷键一览表">8.1 原生编辑器常用快捷键一览表</h3>
+<p>注意：这里仅列出一些常用快捷键，并不是完整的列表。想看更完整的，那还是去找官方文档更合适。</p>
+<table>
+<thead>
+<tr>
+<th>快捷键</th>
+<th>作用</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ctrl+n</td>
+<td>新建关卡</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+o</td>
+<td>打开关卡</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+shift+o</td>
+<td>打开上次编辑的关卡</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+u</td>
+<td>打开url</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+s</td>
+<td>保存</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+shift+s</td>
+<td>另存为</td>
+<td>奇怪，为什么在我这里不起作用呢？</td>
+</tr>
+<tr>
+<td>ctrl+shift+r</td>
+<td>将当前关卡作为独立关卡运行</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+shift+p</td>
+<td>导出以发布</td>
+<td>无</td>
+</tr>
+<tr>
+<td>alt+s</td>
+<td>关卡编辑器设置</td>
+<td>无</td>
+</tr>
+<tr>
+<td>alt+q</td>
+<td>退出</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+z</td>
+<td>撤销</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+shift+z/ctrl+y</td>
+<td>重做</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+x</td>
+<td>剪切</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+c</td>
+<td>复制</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+v</td>
+<td>粘贴</td>
+<td>原版游戏行为是粘贴到试图中心的位置，mod改为粘贴在编辑光标处。</td>
+</tr>
+<tr>
+<td>ctrl+b/ctrl+shift+v</td>
+<td>粘贴到下一小节</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+d</td>
+<td>克隆选中的事件</td>
+<td>无</td>
+</tr>
+<tr>
+<td>a</td>
+<td>开关自动模式</td>
+<td>无</td>
+</tr>
+<tr>
+<td>f</td>
+<td>开关全屏</td>
+<td>全屏状态下时间轴会隐藏，主要用于预览关卡。在此状态下编辑光标可能无法按预期工作。</td>
+</tr>
+<tr>
+<td>m</td>
+<td>开关节拍器</td>
+<td>无</td>
+</tr>
+<tr>
+<td>p</td>
+<td>播放/暂停</td>
+<td>无</td>
+</tr>
+<tr>
+<td>delete/backspace</td>
+<td>删除选中的事件</td>
+<td>无</td>
+</tr>
+<tr>
+<td>大键盘数字1-6</td>
+<td>切换六个不同标签页</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+大键盘1-4</td>
+<td>切换到不同房间</td>
+<td>如果当前在其他标签页，会自动切换到轨道标签页。</td>
+</tr>
+<tr>
+<td>home</td>
+<td>回到关卡开头</td>
+<td>无</td>
+</tr>
+<tr>
+<td>pageup/pagedown</td>
+<td>快退/快进？</td>
+<td>我个人觉得不是很好用。</td>
+</tr>
+<tr>
+<td>shift+home</td>
+<td>选中当前所选事件在当前标签页（或轨道）内前面的所有事件</td>
+<td>我知道这有点绕。</td>
+</tr>
+<tr>
+<td>shift+end</td>
+<td>选中当前所选事件在当前标签页（或轨道）内后续的所有事件</td>
+<td>我也知道这也很绕。</td>
+</tr>
+<tr>
+<td>ctrl+shift+home</td>
+<td>选中当前所选事件前面的所有事件</td>
+<td>这个就好多了。</td>
+</tr>
+<tr>
+<td>ctrl+shift+end</td>
+<td>选中当前所选事件后续的所有事件</td>
+<td>这个也是。</td>
+</tr>
+<tr>
+<td>esc</td>
+<td>退出全屏/取消选择</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<h3 id="82-mod快捷键一览表">8.2 mod快捷键一览表</h3>
+<table>
+<thead>
+<tr>
+<th>快捷键</th>
+<th>功能</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>f10</td>
+<td>打开/关闭编辑器主菜单</td>
+<td>无</td>
+</tr>
+<tr>
+<td>左右光标</td>
+<td>在当前标签页（或轨道）内浏览事件</td>
+<td>无</td>
+</tr>
+<tr>
+<td>上下光标</td>
+<td>在轨道/精灵标签页下切换轨道/精灵</td>
+<td>无</td>
+</tr>
+<tr>
+<td>enter</td>
+<td>跳转到选中事件所在位置并开始播放</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+enter</td>
+<td>打开helper编辑事件</td>
+<td>无</td>
+</tr>
+<tr>
+<td>shift+enter</td>
+<td>打开helper编辑轨道</td>
+<td>无</td>
+</tr>
+<tr>
+<td>大键盘0</td>
+<td>打开helper编辑元数据</td>
+<td>无</td>
+</tr>
+<tr>
+<td>insert</td>
+<td>在编辑光标处插入事件</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+insert</td>
+<td>添加轨道/精灵到所在房间（仅轨道/精灵标签页有效）</td>
+<td>无</td>
+</tr>
+<tr>
+<td>/（斜杠）</td>
+<td>编辑光标移至播放头所在位置</td>
+<td>无</td>
+</tr>
+<tr>
+<td>shift+/</td>
+<td>朗读编辑光标的当前位置</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+/</td>
+<td>编辑光标吸附到最近的半拍</td>
+<td>无</td>
+</tr>
+<tr>
+<td>ctrl+shift+/</td>
+<td>打开编辑光标跳转对话框</td>
+<td>无</td>
+</tr>
+<tr>
+<td>alt+斜杠</td>
+<td>跳转到编辑光标所在位置并开始播放</td>
+<td>无</td>
+</tr>
+<tr>
+<td>,（逗号）和.(句号)</td>
+<td>编辑光标前移/后移1拍</td>
+<td>加shift为0.1拍，加alt为0.01拍，加shift和alt为1小节。</td>
+</tr>
+<tr>
+<td>z/x</td>
+<td>所选事件前移/后移1拍（或1小节）</td>
+<td>加shift为0.1拍，加alt为0.01拍，加shift和alt为1小节。详见<a href="#45-%E5%BF%AB%E6%8D%B7%E7%A7%BB%E5%8A%A8%E4%BA%8B%E4%BB%B6">4.5 快捷移动事件</a>。</td>
+</tr>
+<tr>
+<td>c</td>
+<td>事件吸附到最近的半拍</td>
+<td>无</td>
+</tr>
+</tbody>
+</table>
+<h3 id="83-联系方式">8.3 联系方式</h3>
+<p>邮箱： <a href="mailto:huangzitong94@gmail.com">huangzitong94@gmail.com</a></p>
+<p>qq： 1528344627</p>
+
+            
+            
+        </body>
+        </html>
