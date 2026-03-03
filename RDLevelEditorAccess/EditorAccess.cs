@@ -504,7 +504,12 @@ namespace RDLevelEditorAccess
             {
                 if (editor.selectedControl != null && editor.selectedControl.levelEvent != null)
                 {
-                    int eventBar = editor.selectedControl.levelEvent.bar;
+                    var levelEvent = editor.selectedControl.levelEvent;
+                    int eventBar = levelEvent.bar;
+
+                    // 同时设置编辑光标到事件位置
+                    _editCursor = levelEvent.barAndBeat;
+
                     editor.ScrubToBar(eventBar, playAfterScrubbing: true);
                     Narration.Say(string.Format(RDString.Get("eam.event.jumpAndPlay"), $"{RDString.Get("editor.bar")} {eventBar}"), NarrationCategory.Notification);
                 }
