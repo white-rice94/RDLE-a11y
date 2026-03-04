@@ -9,17 +9,27 @@ echo "RDMods 一键发布脚本"
 echo "=========================================="
 echo ""
 
-# 游戏目录（从 Directory.Build.props 读取）
-GAME_DIR="D:/SteamLibrary/steamapps/common/Rhythm Doctor"
+# 从 Directory.Build.user.props 提取游戏路径（若存在）
+GAME_DIR=""
+if [ -f "Directory.Build.user.props" ]; then
+  GAME_DIR=$(grep '<GameDir>' Directory.Build.user.props | sed 's/.*<GameDir>\(.*\)<\/GameDir>.*/\1/' | tr -d '\r')
+fi
+
+if [ -z "$GAME_DIR" ]; then
+  echo "错误：请先创建 Directory.Build.user.props 并配置 GameDir"
+  echo "参考 Directory.Build.user.props.example 文件"
+  exit 1
+fi
+
 RELEASE_DIR="release/main"
 
 # 1. 清理并编译 Release 版本
 echo "[1/4] 清理旧的编译产物..."
-dotnet clean RDMods.sln -c Release
+dotnet clean RDLE-a11y.sln -c Release
 
 echo ""
 echo "[2/4] 编译 Release 版本..."
-dotnet build RDMods.sln -c Release
+dotnet build RDLE-a11y.sln -c Release
 
 # 2. 复制编译产物到 release 文件夹
 echo ""

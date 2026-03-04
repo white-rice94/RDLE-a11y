@@ -374,3 +374,12 @@ RDLevelEditorAccess/IPC/tmpclaude-*-cwd
 
 # Release 文件夹（编译产物）
 release/
+
+# IPC 临时文件（运行时生成）
+temp/
+
+# 本地路径覆盖文件（每个开发者自己配置，不提交）
+Directory.Build.user.props
+
+# Visual Studio 调试启动配置（含本地路径）
+RDLevelEditorAccess/Properties/launchSettings.json

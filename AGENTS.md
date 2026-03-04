@@ -38,17 +38,17 @@ Key concepts:
 
 ```bash
 # Build everything (Debug)
-dotnet build RDMods.sln
+dotnet build RDLE-a11y.sln
 
 # Build Release
-dotnet build RDMods.sln -c Release
+dotnet build RDLE-a11y.sln -c Release
 
 # Build single project
 dotnet build RDLevelEditorAccess/RDLevelEditorAccess.csproj
 dotnet build RDEventEditorHelper/RDEventEditorHelper.csproj
 
 # Clean
-dotnet clean RDMods.sln
+dotnet clean RDLE-a11y.sln
 ```
 
 **Auto-deployment**: `Directory.Build.props` copies output to game folder automatically:

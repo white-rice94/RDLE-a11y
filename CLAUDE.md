@@ -15,17 +15,17 @@ RDMods is a Unity C# modding project for **Rhythm Doctor** that adds accessibili
 
 ```bash
 # Build entire solution (Debug)
-dotnet build RDMods.sln
+dotnet build RDLE-a11y.sln
 
 # Build Release
-dotnet build RDMods.sln -c Release
+dotnet build RDLE-a11y.sln -c Release
 
 # Build individual projects
 dotnet build RDLevelEditorAccess/RDLevelEditorAccess.csproj
 dotnet build RDEventEditorHelper/RDEventEditorHelper.csproj
 
 # Clean
-dotnet clean RDMods.sln
+dotnet clean RDLE-a11y.sln
 ```
 
 **Auto-deployment**: `Directory.Build.props` automatically copies build outputs to the game directory:

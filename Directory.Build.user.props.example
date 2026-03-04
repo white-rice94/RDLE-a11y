@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <!-- 将此文件复制为 Directory.Build.user.props，并填写你的游戏安装路径 -->
+    <!-- Copy this file to Directory.Build.user.props and fill in your game installation path -->
+    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\Rhythm Doctor</GameDir>
+  </PropertyGroup>
+</Project>

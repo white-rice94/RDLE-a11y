@@ -1,32 +1,40 @@
 <Project>
   <PropertyGroup>
-    <GameDir>D:\SteamLibrary\steamapps\common\Rhythm Doctor</GameDir>
+    <!-- 默认占位符（开发者需在 Directory.Build.user.props 中覆盖） -->
+    <GameDir Condition="'$(GameDir)'==''">GAME_DIR_NOT_SET</GameDir>
 
     <ModDeployDir>$(GameDir)\BepInEx\plugins</ModDeployDir>
     <HelperDeployDir>$(GameDir)</HelperDeployDir>
   </PropertyGroup>
 
-  <Target Name="CopyModToGameFolder" AfterTargets="Build">
-    
+  <!-- 导入本地覆盖文件（不进入版本控制） -->
+  <Import Project="Directory.Build.user.props"
+          Condition="Exists('Directory.Build.user.props')" />
+
+  <!-- 部署目标：仅在 GameDir 已配置时执行 -->
+  <Target Name="CopyModToGameFolder" AfterTargets="Build"
+          Condition="'$(GameDir)'!='GAME_DIR_NOT_SET'">
+
     <Message Text="正在将 $(ProjectName) 复制到游戏目录..." Importance="High" />
 
-    <Copy SourceFiles="$(TargetPath)" 
-          DestinationFolder="$(ModDeployDir)" 
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(ModDeployDir)"
           SkipUnchangedFiles="true" />
 
-    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb" 
-          DestinationFolder="$(ModDeployDir)" 
+    <Copy SourceFiles="$(TargetDir)$(TargetName).pdb"
+          DestinationFolder="$(ModDeployDir)"
           Condition="Exists('$(TargetDir)$(TargetName).pdb')"
           SkipUnchangedFiles="true" />
-          
+
   </Target>
 
-  <Target Name="CopyHelperToGameFolder" AfterTargets="Build" Condition="'$(ProjectName)'=='RDEventEditorHelper'">
-    
+  <Target Name="CopyHelperToGameFolder" AfterTargets="Build"
+          Condition="'$(ProjectName)'=='RDEventEditorHelper' AND '$(GameDir)'!='GAME_DIR_NOT_SET'">
+
     <Message Text="正在将 Helper 复制到游戏根目录..." Importance="High" />
 
-    <Copy SourceFiles="$(TargetPath)" 
-          DestinationFolder="$(HelperDeployDir)" 
+    <Copy SourceFiles="$(TargetPath)"
+          DestinationFolder="$(HelperDeployDir)"
           SkipUnchangedFiles="true" />
 
   </Target>
