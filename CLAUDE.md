@@ -11,6 +11,24 @@ RDMods is a Unity C# modding project for **Rhythm Doctor** that adds accessibili
 
 **Architecture**: The mod runs inside Unity's level editor and communicates with the helper via file-based IPC using `temp/source.json` and `temp/result.json`.
 
+## Initial Development Setup
+
+Before building for the first time:
+
+1. Copy the example configuration:
+   ```bash
+   cp Directory.Build.user.props.example Directory.Build.user.props
+   ```
+
+2. Edit `Directory.Build.user.props` and set `<GameDir>` to your Rhythm Doctor installation path:
+   ```xml
+   <GameDir>C:\Program Files (x86)\Steam\steamapps\common\Rhythm Doctor</GameDir>
+   ```
+
+3. Ensure BepInEx 5.x is installed in the game directory.
+
+The build system will automatically deploy outputs to the configured game directory.
+
 ## Build Commands
 
 ```bash
@@ -31,8 +49,6 @@ dotnet clean RDLE-a11y.sln
 **Auto-deployment**: `Directory.Build.props` automatically copies build outputs to the game directory:
 - Mod DLL → `{GameDir}/BepInEx/plugins/`
 - Helper EXE → `{GameDir}/`
-
-The game directory is configured in `Directory.Build.props` as `D:\SteamLibrary\steamapps\common\Rhythm Doctor`.
 
 ## Project Structure
 
@@ -64,8 +80,8 @@ The mod provides extensive keyboard navigation for accessibility:
 
 | Shortcut | Function |
 |----------|----------|
-| **Insert** | Add event at current timeline position |
-| **Ctrl+Insert** | Add row/sprite (context-dependent) |
+| **Insert** or **F2** | Add event at current timeline position |
+| **Ctrl+Insert** or **Ctrl+F2** | Add row/sprite (context-dependent) |
 | **Return** | Activate selected item / Open property editor |
 | **Arrow Keys** | Navigate timeline / Move events |
 | **Alt+Arrow** | Fine adjustment (0.01 beat) |

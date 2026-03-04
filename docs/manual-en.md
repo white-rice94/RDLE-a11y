@@ -38,7 +38,6 @@
     - [Why won't the helper open?](#why-wont-the-helper-open)
     - [Why does the game freeze after the save dialog pops up?](#why-does-the-game-freeze-after-the-save-dialog-pops-up)
     - [Why do all native editor shortcuts stop working after I click cancel in the save dialog when exiting the level editor?](#why-do-all-native-editor-shortcuts-stop-working-after-i-click-cancel-in-the-save-dialog-when-exiting-the-level-editor)
-    - [What's in the levels folder?](#whats-in-the-levels-folder)
   - [8. Appendix](#8-appendix)
     - [8.1 Native Editor Common Shortcuts Reference](#81-native-editor-common-shortcuts-reference)
     - [8.2 Mod Shortcuts Reference](#82-mod-shortcuts-reference)
@@ -88,9 +87,7 @@ To prevent you from thinking the manual is too long and not wanting to read it, 
 
 ### 2.2 Installation Steps
 
-After extracting, besides this manual, you should see two folders: **levels** and **main**. Go into the main folder, select all, copy to the directory where your rhythm doctor.exe is located, and paste. That's it. The next time you run the game, the mod will run smoothly.
-
-You ask what's in the levels folder? Well, go in and see for yourself. Or wait for me to tell you later.
+After extracting, besides this manual, you should also see the **main** folder. Go into it, select all, copy to the directory where your rhythm doctor.exe is located, and paste. That's it. The next time you run the game, the mod will run smoothly.
 
 ## 3. Quick Start
 
@@ -158,7 +155,7 @@ In the Rows or Sprites tab, press ctrl+insert or ctrl+f2 to create a new row or 
 
 ### 4.4 Edit Cursor
 
-To make it more convenient for visually impaired players (actually, it's just me for now), the mod introduces the edit cursor feature. The edit cursor is a player-controllable temporary anchor point that doesn't move with playback and can be freely adjusted in position, making it convenient for players to quickly locate when creating events and other scenarios. Below are its shortcut key instructions.
+To make it more convenient for visually impaired players, the mod introduces the edit cursor feature. The edit cursor is a player-controllable temporary anchor point that doesn't move with playback and can be freely adjusted in position, making it convenient for players to quickly locate when creating events and other scenarios. Below are its shortcut key instructions.
 PS: I know some people definitely didn't understand the definition of edit cursor above, but trust me, after reading the shortcut key instructions you should understand... I hope...
 
 - / (slash), move the edit cursor to the current playback position
@@ -237,10 +234,6 @@ This is a low-probability event, and I'm not sure what the problem is. This is w
 ### Why do all native editor shortcuts stop working after I click cancel in the save dialog when exiting the level editor?
 
 After my testing, this seems to be a problem with the game itself? Because I tried the same operation without running the mod, and the problem can still be reproduced. You can only press alt+f4, then save or discard, exit the game and re-enter to solve it. But this is much better than the previous situation, isn't it?
-
-### What's in the levels folder?
-
-Inside is a demo level I made myself using this mod. Feel free to import it and play around with it. What? You ask me why I added an 's' to the folder name when there's only one level? Because I want to, is that not okay?
 
 ## 8. Appendix
 

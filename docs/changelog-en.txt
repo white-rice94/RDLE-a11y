@@ -1,3 +1,7 @@
+1.1.1 (2026-03-04)
+1. Added F2 key as an alternative to Insert. If your keyboard doesn't have an Insert key, you can use F2 instead. The original Insert key still works.
+2. When navigating events with left/right arrow keys, if you reach the boundary, the event information will be announced again.
+
 1.1 (2026-03-03)
 1. Added ctrl+shift+slash to open the edit cursor jump dialog.
 2. Added shift+alt modifier key support for z/x (move event) and comma/period (move edit cursor), with a step size of 1 bar.
