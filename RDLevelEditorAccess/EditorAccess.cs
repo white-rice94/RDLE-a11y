@@ -185,6 +185,31 @@ namespace RDLevelEditorAccess
             return false;
         }
 
+        /// <summary>
+        /// 检查 UI 元素是否有有意义的文本内容
+        /// </summary>
+        private static bool HasMeaningfulText(Graphic graphic)
+        {
+            // 检查子元素中的 TextMeshPro 文本组件
+            var tmpText = graphic.GetComponentInChildren<TMP_Text>();
+            if (tmpText != null && !string.IsNullOrWhiteSpace(tmpText.text))
+                return true;
+
+            // 检查子元素中的 Unity Text 组件
+            var text = graphic.GetComponentInChildren<Text>();
+            if (text != null && !string.IsNullOrWhiteSpace(text.text))
+                return true;
+
+            // 如果自己就是文本组件
+            if (graphic is Text selfText && !string.IsNullOrWhiteSpace(selfText.text))
+                return true;
+
+            if (graphic is TMP_Text selfTmpText && !string.IsNullOrWhiteSpace(selfTmpText.text))
+                return true;
+
+            return false;
+        }
+
         // ===================================================================================
         // 核心功能区域：通用 UI 导航逻辑 (已优化)
         // ===================================================================================
@@ -219,10 +244,30 @@ namespace RDLevelEditorAccess
                     .Where(g => g.gameObject.activeInHierarchy)
                     .Where(g =>
                     {
-                        // A. 如果是可交互的 (Selectable)，保留 (按钮、开关、输入框)
-                        if (g.GetComponent<Selectable>() != null) return true;
+                        var selectable = g.GetComponent<Selectable>();
+
+                        // A. 如果是可交互的 (Selectable)
+                        if (selectable != null)
+                        {
+                            // 过滤掉 Scrollbar 和 Slider (通常没有文本，不适合键盘导航)
+                            if (selectable is Scrollbar || selectable is Slider)
+                            {
+                                // 例外：如果它确实有文本标签，保留它（罕见但可能）
+                                if (HasMeaningfulText(g))
+                                    return true;
+
+                                // 否则过滤掉
+                                return false;
+                            }
+
+                            // 其他 Selectable (Button, Toggle, InputField, Dropdown) 保留
+                            return true;
+                        }
+
                         // B. 如果是纯文本 (Text/TMP)，保留 (用于朗读标签)，但排除 Selectable 的子文本（避免重复）
-                        if ((g is Text || g is TMPro.TMP_Text) && g.GetComponentInParent<Selectable>() == null) return true;
+                        if ((g is Text || g is TMPro.TMP_Text) && g.GetComponentInParent<Selectable>() == null)
+                            return true;
+
                         // C. 既不是按钮也不是字 (比如纯 Image 背景)，视为噪音，过滤掉
                         return false;
                     })
@@ -421,7 +466,17 @@ namespace RDLevelEditorAccess
                     textToSay = $"{textToSay} " + (toggle.isOn ? "已选中" : "未选中");
                 }
 
-                if (string.IsNullOrEmpty(textToSay)) textToSay = element.name;
+                if (string.IsNullOrEmpty(textToSay))
+                {
+                    // 如果是 Scrollbar/Slider 且没有文本，跳过朗读
+                    if (selectableComponent is Scrollbar || selectableComponent is Slider)
+                    {
+                        Debug.LogWarning($"[SelectUIElement] 跳过无文本的 {selectableComponent.GetType().Name}: {element.name}");
+                        return; // 不朗读，直接返回
+                    }
+
+                    textToSay = element.name; // 其他情况使用 GameObject 名称作为后备
+                }
 
                 // 发送朗读
                 Debug.Log($"[朗读] {textToSay}");
