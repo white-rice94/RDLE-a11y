@@ -482,14 +482,21 @@ namespace RDLevelEditorAccess.IPC
                 float pitch = request.pitch / 100f;
                 float pan = request.pan / 100f;
 
-                Debug.Log($"[FileIPC] 播放声音: {request.soundName}, 音量={volume}, 音调={pitch}, 声像={pan}");
+                // 音效名称需要添加 "snd" 前缀（游戏内部约定）
+                string soundName = request.soundName;
+                if (!soundName.StartsWith("snd") && !soundName.Contains("."))
+                {
+                    soundName = "snd" + soundName;
+                }
+
+                Debug.Log($"[FileIPC] 播放声音: {soundName} (原始: {request.soundName}), 音量={volume}, 音调={pitch}, 声像={pan}");
 
                 // 使用反射调用 RDBase.PlaySound 避免 AudioMixerGroup 类型引用问题
                 var playMethod = typeof(RDBase).GetMethod("PlaySound",
                     System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
                 if (playMethod != null)
                 {
-                    playMethod.Invoke(null, new object[] { request.soundName, volume, null, pitch, pan });
+                    playMethod.Invoke(null, new object[] { soundName, volume, null, pitch, pan });
                 }
 
                 // 删除请求文件
