@@ -313,6 +313,9 @@ namespace RDLevelEditorAccess.IPC
             // NEW: 处理validateVisibility请求（与result.json处理独立，不中断轮询和键盘锁定）
             PollPropertyValidationRequests();
 
+            // NEW: 处理播放声音请求（单向通信，不影响主流程）
+            PollPlaySoundRequests();
+
             if (File.Exists(_resultPath))
             {
                 try
@@ -449,6 +452,54 @@ namespace RDLevelEditorAccess.IPC
                 Debug.LogError($"[FileIPC] Failed to process visibility validation: {ex.Message}");
                 // 错误时也删除文件，避免反复尝试
                 try { File.Delete(validationPath); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// 处理 Helper 的播放声音请求（单向通信）
+        /// </summary>
+        private void PollPlaySoundRequests()
+        {
+            string requestPath = Path.Combine(_tempPath, "playSoundRequest.json");
+            if (!File.Exists(requestPath)) return;
+
+            try
+            {
+                string json = File.ReadAllText(requestPath);
+                var options = new JsonSerializerOptions { IncludeFields = true };
+                var request = JsonSerializer.Deserialize<PlaySoundRequest>(json, options);
+
+                // 验证 token
+                if (request?.token != _sessionToken)
+                {
+                    Debug.LogWarning($"[FileIPC] 播放声音请求 token 不匹配，忽略");
+                    File.Delete(requestPath);
+                    return;
+                }
+
+                // 播放声音
+                float volume = request.volume / 100f;
+                float pitch = request.pitch / 100f;
+                float pan = request.pan / 100f;
+
+                Debug.Log($"[FileIPC] 播放声音: {request.soundName}, 音量={volume}, 音调={pitch}, 声像={pan}");
+
+                // 使用反射调用 RDBase.PlaySound 避免 AudioMixerGroup 类型引用问题
+                var playMethod = typeof(RDBase).GetMethod("PlaySound",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (playMethod != null)
+                {
+                    playMethod.Invoke(null, new object[] { request.soundName, volume, null, pitch, pan });
+                }
+
+                // 删除请求文件
+                File.Delete(requestPath);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FileIPC] 播放声音请求失败: {ex.Message}");
+                // 错误时也删除文件，避免反复尝试
+                try { File.Delete(requestPath); } catch { }
             }
         }
 
@@ -1858,6 +1909,19 @@ namespace RDLevelEditorAccess.IPC
             public string action;
             public Dictionary<string, string> updates;
             public string methodName;  // 当 action 为 "execute" 时使用
+        }
+
+        /// <summary>
+        /// 播放声音请求（Helper → Mod 单向通信）
+        /// </summary>
+        [Serializable]
+        private class PlaySoundRequest
+        {
+            public string token;      // 会话特征码
+            public string soundName;  // 音效文件名
+            public int volume;        // 音量 (0-100)
+            public int pitch;         // 音调 (0-200)
+            public int pan;           // 声像 (-100 到 100)
         }
 
         [Serializable]

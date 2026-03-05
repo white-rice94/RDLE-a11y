@@ -49,6 +49,15 @@ namespace RDEventEditorHelper
     public static class FileIPC
     {
         private static readonly string TempDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "temp");
+        private static string _currentToken = null;  // 当前会话的 token
+
+        /// <summary>
+        /// 设置当前会话的 token（从 EditorForm 传入）
+        /// </summary>
+        public static void SetCurrentToken(string token)
+        {
+            _currentToken = token;
+        }
 
         /// <summary>
         /// 向Mod发送属性更新请求并等待响应
@@ -106,6 +115,46 @@ namespace RDEventEditorHelper
             {
                 // 清理请求文件
                 try { if (File.Exists(requestPath)) File.Delete(requestPath); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// 向 Mod 发送播放声音请求（单向通信，无需等待响应）
+        /// </summary>
+        public static void SendPlaySoundRequest(string soundName, int volume, int pitch, int pan)
+        {
+            if (string.IsNullOrEmpty(_currentToken))
+            {
+                Debug.WriteLine("[FileIPC] Cannot send play sound request: token not set");
+                return;
+            }
+
+            string requestPath = Path.Combine(TempDir, "playSoundRequest.json");
+
+            // 确保temp目录存在
+            if (!Directory.Exists(TempDir))
+                Directory.CreateDirectory(TempDir);
+
+            try
+            {
+                var request = new
+                {
+                    token = _currentToken,
+                    soundName = soundName,
+                    volume = volume,
+                    pitch = pitch,
+                    pan = pan
+                };
+
+                string json = JsonConvert.SerializeObject(request, Formatting.Indented);
+                File.WriteAllText(requestPath, json);
+
+                Debug.WriteLine($"[FileIPC] Sent play sound request: {soundName}");
+            }
+            catch (Exception ex)
+            {
+                // 静默失败，不影响主流程
+                Debug.WriteLine($"[FileIPC] SendPlaySoundRequest failed: {ex.Message}");
             }
         }
     }
@@ -198,6 +247,10 @@ namespace RDEventEditorHelper
             _localizedLevelAudioFiles = localizedLevelAudioFiles ?? levelAudioFiles;  // 如果没有本地化，使用原始名称
             _levelDirectory = levelDirectory;
             this.Text = title ?? $"编辑事件 (Edit Event): {eventType}";
+
+            // 设置当前会话的 token 到 FileIPC
+            FileIPC.SetCurrentToken(_token);
+
             BuildUI();
 
             // NEW: 获取初始可见性（确保与Mod的enableIf状态一致）
@@ -816,7 +869,41 @@ namespace RDEventEditorHelper
                             OnOK?.Invoke(GetCurrentUpdates());
                             this.Close();
                         };
-                        
+
+                        // 空格键试听音效
+                        listView.KeyDown += (s, e) =>
+                        {
+                            if (e.KeyCode == Keys.Space && listView.SelectedItems.Count > 0)
+                            {
+                                e.Handled = true;  // 防止默认行为（选中/取消选中）
+
+                                // 获取选中的原始音频名称
+                                string rawSoundName = listView.SelectedItems[0].Tag as string;
+
+                                // 跳过特殊标记（轨道默认）
+                                if (rawSoundName == "__track_default__")
+                                {
+                                    return;
+                                }
+
+                                // 获取当前的音量、音调、声像参数
+                                var volTxt = soundPanel.Controls.Find("Volume", false).FirstOrDefault() as TextBox;
+                                var pitchTxt = soundPanel.Controls.Find("Pitch", false).FirstOrDefault() as TextBox;
+                                var panTxt = soundPanel.Controls.Find("Pan", false).FirstOrDefault() as TextBox;
+
+                                int volume = 100;
+                                int pitch = 100;
+                                int pan = 0;
+
+                                if (volTxt != null && int.TryParse(volTxt.Text, out int v)) volume = v;
+                                if (pitchTxt != null && int.TryParse(pitchTxt.Text, out int p)) pitch = p;
+                                if (panTxt != null && int.TryParse(panTxt.Text, out int pn)) pan = pn;
+
+                                // 发送播放请求
+                                FileIPC.SendPlaySoundRequest(rawSoundName, volume, pitch, pan);
+                            }
+                        };
+
                         // 搜索过滤（真正移除/添加项目，屏幕阅读器友好）
                         var allSoundItems = listView.Items.Cast<ListViewItem>().ToList();
                         txtSearch.TextChanged += (s, e) =>
