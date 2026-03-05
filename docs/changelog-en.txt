@@ -1,3 +1,10 @@
+1.1.2 (2026-03-05)
+1. Helper now supports pressing space to preview selected sound effects in sound selection.
+2. Helper's sound list now displays localized names instead of internal names.
+3. Optimized UI navigation by filtering out useless controls.
+4. Optimized timeline navigation - event name and event position are now announced in a single message.
+PS: What? You're asking if I fixed that occasional freeze issue when browsing with left/right cursor? Do you think this looks like it's been fixed? If any of you can fix it, feel free to submit a PR on my GitHub.
+
 1.1.1 (2026-03-04)
 1. Added F2 key as an alternative to Insert. If your keyboard doesn't have an Insert key, you can use F2 instead. The original Insert key still works.
 2. When navigating events with left/right arrow keys, if you reach the boundary, the event information will be announced again.

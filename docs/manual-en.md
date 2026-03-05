@@ -32,6 +32,7 @@
   - [5. External Editor (RDEventEditorHelper)](#5-external-editor-rdeventeditorhelper)
     - [5.1 What is this?](#51-what-is-this)
     - [5.2 How to use?](#52-how-to-use)
+      - [5.2.1 Sound Preview](#521-sound-preview)
   - [6. Known Issues and Limitations](#6-known-issues-and-limitations)
   - [7. FAQ](#7-faq)
     - [Why isn't the mod loading?](#why-isnt-the-mod-loading)
@@ -199,6 +200,12 @@ Because the official inspector panel is quite complex and troublesome to adapt, 
 ### 5.2 How to use?
 
 When you select an event or row in the level editor, or press number key 0 on the main keyboard, the helper will launch. It will generate UI based on the object currently being edited, and you can directly use the screen reader to navigate between properties. After editing is complete, just click the OK button to apply it to the game. If you want to abandon the edit, just press esc or click the Cancel button.
+
+#### 5.2.1 Sound Preview
+
+In the helper, if the focus is on a sound list, you can press the space key to play the currently selected sound effect.
+
+PS: Do you think this section feels a bit abrupt here? Well, I think so too. But there's no way around it - this is to help you understand the usage more comprehensively, so I rushed to add it after the 1.1.2 update. I'm such a good person.
 
 ## 6. Known Issues and Limitations
 
