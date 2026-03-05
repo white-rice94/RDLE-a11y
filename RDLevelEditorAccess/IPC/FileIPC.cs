@@ -491,12 +491,26 @@ namespace RDLevelEditorAccess.IPC
 
                 Debug.Log($"[FileIPC] 播放声音: {soundName} (原始: {request.soundName}), 音量={volume}, 音调={pitch}, 声像={pan}");
 
-                // 使用反射调用 RDBase.PlaySound 避免 AudioMixerGroup 类型引用问题
-                var playMethod = typeof(RDBase).GetMethod("PlaySound",
-                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-                if (playMethod != null)
+                // 使用反射调用 scrConductor.PlayImmediatelyLevelEditor
+                // 这个方法专门为关卡编辑器设计，会忽略 AudioListener 的暂停状态
+                var conductorType = Type.GetType("scrConductor, Assembly-CSharp");
+                if (conductorType != null)
                 {
-                    playMethod.Invoke(null, new object[] { soundName, volume, null, pitch, pan });
+                    var playMethod = conductorType.GetMethod("PlayImmediatelyLevelEditor",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (playMethod != null)
+                    {
+                        // PlayImmediatelyLevelEditor(string sound, AudioMixerGroup group, float gain = 1f, float pitch = 1f)
+                        playMethod.Invoke(null, new object[] { soundName, null, volume, pitch });
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[FileIPC] 未找到 PlayImmediatelyLevelEditor 方法");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 scrConductor 类型");
                 }
 
                 // 删除请求文件
