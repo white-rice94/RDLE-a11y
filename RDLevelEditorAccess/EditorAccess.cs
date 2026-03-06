@@ -993,8 +993,20 @@ namespace RDLevelEditorAccess
             editor.selectedControl.UpdateUI();
             editor.inspectorPanelManager.GetCurrent()?.UpdateUI(evt);
 
+            // 重新获取可调节属性列表（因为属性值变化可能影响其他属性的 enableIf 条件）
+            var oldProp = prop;
+            adjustableProperties = GetAdjustableProperties(evt);
+
+            // 尝试保持当前属性的选中状态
+            currentPropertyIndex = adjustableProperties.IndexOf(oldProp);
+            if (currentPropertyIndex < 0 && adjustableProperties.Count > 0)
+            {
+                // 如果当前属性不再可用，选择第一个属性
+                currentPropertyIndex = 0;
+            }
+
             // 朗读新值
-            string valueStr = FormatPropertyValue(prop, evt);
+            string valueStr = FormatPropertyValue(oldProp, evt);
             Narration.Say(valueStr, NarrationCategory.Navigation);
         }
 
