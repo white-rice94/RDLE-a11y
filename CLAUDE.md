@@ -13,19 +13,34 @@ RDMods is a Unity C# modding project for **Rhythm Doctor** that adds accessibili
 
 ## Initial Development Setup
 
+### Prerequisites
+
+- Rhythm Doctor (Steam version)
+- [BepInEx 5.x](https://github.com/BepInEx/BepInEx/releases) installed in game directory
+- [.NET SDK 9.0](https://dotnet.microsoft.com/download) or later
+- Git
+
+### First-Time Setup
+
 Before building for the first time:
 
-1. Copy the example configuration:
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/white-rice94/RDLE-a11y.git
+   cd RDLE-a11y
+   ```
+
+2. Copy the example configuration:
    ```bash
    cp Directory.Build.user.props.example Directory.Build.user.props
    ```
 
-2. Edit `Directory.Build.user.props` and set `<GameDir>` to your Rhythm Doctor installation path:
+3. Edit `Directory.Build.user.props` and set `<GameDir>` to your Rhythm Doctor installation path:
    ```xml
    <GameDir>C:\Program Files (x86)\Steam\steamapps\common\Rhythm Doctor</GameDir>
    ```
 
-3. Ensure BepInEx 5.x is installed in the game directory.
+4. Ensure BepInEx 5.x is installed in the game directory.
 
 The build system will automatically deploy outputs to the configured game directory.
 
@@ -56,7 +71,7 @@ dotnet clean RDLE-a11y.sln
 **Release Process**: The `release.sh` script builds Release configuration and packages everything into `release/main/`:
 - Compiles both projects in Release mode
 - Copies DLL and EXE from game directory to release folder
-- Copies documentation from `docs/` to `release/docs/`
+- Copies documentation (including HTML versions) from `docs/` to `release/docs/`
 - Creates a distribution-ready package structure
 
 ## Project Structure
@@ -85,6 +100,8 @@ agents references/Assembly-CSharp/
 docs/
 ├── manual-cn.md              # Chinese user manual
 ├── manual-en.md              # English user manual
+├── manual-cn.html            # Chinese manual (HTML version)
+├── manual-en.html            # English manual (HTML version)
 ├── changelog-cn.txt          # Chinese changelog
 └── changelog-en.txt          # English changelog
 ```
@@ -494,3 +511,11 @@ Use short Chinese descriptions:
 重构 XX 模块
 优化 XX 性能
 ```
+
+## License
+
+This project is licensed under the MIT License.
+
+## Repository
+
+GitHub: [white-rice94/RDLE-a11y](https://github.com/white-rice94/RDLE-a11y)
