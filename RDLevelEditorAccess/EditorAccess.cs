@@ -1047,8 +1047,8 @@ namespace RDLevelEditorAccess
             {
                 // 尝试获取枚举值的本地化
                 string enumKey = $"enum.{enumProp.enumType.Name}.{value}";
-                string localized = RDString.Get(enumKey);
-                return localized != enumKey ? localized : value.ToString() ?? "";
+                string localized = RDString.GetWithCheck(enumKey, out bool exists);
+                return exists ? localized : value.ToString() ?? "";
             }
 
             if (prop is FloatPropertyInfo)
