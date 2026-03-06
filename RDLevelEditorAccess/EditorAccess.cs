@@ -86,6 +86,13 @@ namespace RDLevelEditorAccess
         // 编辑光标：时间轴上的虚拟锚点，用于精确控制事件插入/粘贴位置
         internal BarAndBeat _editCursor = new BarAndBeat(1, 1f);
 
+        // ===================================================================================
+        // 属性快速调节状态
+        // ===================================================================================
+        private int currentPropertyIndex = -1;  // 当前选中的属性索引（-1 表示未选择）
+        private List<BasePropertyInfo>? adjustableProperties = null;  // 当前事件的可调节属性列表
+        private LevelEvent_Base? lastSelectedEvent = null;  // 上次选中的事件
+
         public void Awake()
         {
             Instance = this;
@@ -587,6 +594,33 @@ namespace RDLevelEditorAccess
                 }
             }
 
+            // ===================================================================================
+            // 属性快速调节快捷键
+            // ===================================================================================
+
+            // E 键：循环选择属性（Shift+E 反向）
+            if (Input.GetKeyDown(KeyCode.E))
+            {
+                CycleProperty(Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift));
+                return;
+            }
+
+            // R 键：减少属性值
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                AdjustProperty(-1, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift),
+                                   Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt));
+                return;
+            }
+
+            // T 键：增加属性值
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                AdjustProperty(1, Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift),
+                                  Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt));
+                return;
+            }
+
             // Insert 或 F2: 添加事件
             if ((Input.GetKeyDown(KeyCode.Insert) || Input.GetKeyDown(KeyCode.F2)) &&
                 !Input.GetKey(KeyCode.LeftControl) && !Input.GetKey(KeyCode.RightControl))
@@ -776,6 +810,263 @@ namespace RDLevelEditorAccess
                 else if (moveMode != EventMoveMode.BarOnly)
                     SnapSelectedEventsToHalfBeat();
             }
+        }
+
+        // ===================================================================================
+        // 属性快速调节方法
+        // ===================================================================================
+
+        /// <summary>
+        /// 重置属性选择状态
+        /// </summary>
+        public void ResetPropertySelection()
+        {
+            currentPropertyIndex = -1;
+            adjustableProperties = null;
+            lastSelectedEvent = null;
+        }
+
+        /// <summary>
+        /// 获取事件的可调节属性列表
+        /// </summary>
+        private List<BasePropertyInfo> GetAdjustableProperties(LevelEvent_Base evt)
+        {
+            if (evt?.info == null) return new List<BasePropertyInfo>();
+
+            // 过滤可调节的属性
+            // 注意：evt.info.propertiesInfo 已经自动排除了基础属性（使用 BindingFlags.DeclaredOnly）
+            var result = new List<BasePropertyInfo>();
+            foreach (var prop in evt.info.propertiesInfo)
+            {
+                // 跳过 UI-only 属性
+                if (prop.onlyUI) continue;
+
+                // 检查动态可见性
+                if (prop.enableIf != null && !prop.enableIf(evt)) continue;
+
+                // 只支持特定类型
+                if (prop is IntPropertyInfo || prop is FloatPropertyInfo ||
+                    prop is EnumPropertyInfo || prop is BoolPropertyInfo ||
+                    prop is NullablePropertyInfo nullable &&
+                    (nullable.underlyingPropertyInfo is IntPropertyInfo ||
+                     nullable.underlyingPropertyInfo is FloatPropertyInfo ||
+                     nullable.underlyingPropertyInfo is EnumPropertyInfo ||
+                     nullable.underlyingPropertyInfo is BoolPropertyInfo))
+                {
+                    result.Add(prop);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// 循环选择属性
+        /// </summary>
+        private void CycleProperty(bool reverse)
+        {
+            var editor = scnEditor.instance;
+            if (editor?.selectedControl?.levelEvent == null)
+            {
+                Narration.Say(RDString.Get("eam.event.noSelection"), NarrationCategory.Navigation);
+                return;
+            }
+
+            var evt = editor.selectedControl.levelEvent;
+
+            // 检测事件是否变化
+            if (evt != lastSelectedEvent)
+            {
+                lastSelectedEvent = evt;
+                adjustableProperties = GetAdjustableProperties(evt);
+                currentPropertyIndex = -1;
+            }
+
+            if (adjustableProperties == null || adjustableProperties.Count == 0)
+            {
+                Narration.Say(RDString.Get("eam.quickAdjust.notAdjustable"), NarrationCategory.Navigation);
+                return;
+            }
+
+            // 循环索引
+            if (reverse)
+            {
+                currentPropertyIndex--;
+                if (currentPropertyIndex < 0) currentPropertyIndex = adjustableProperties.Count - 1;
+            }
+            else
+            {
+                currentPropertyIndex++;
+                if (currentPropertyIndex >= adjustableProperties.Count) currentPropertyIndex = 0;
+            }
+
+            // 朗读属性名和当前值
+            var prop = adjustableProperties[currentPropertyIndex];
+            string propName = GetLocalizedPropertyName(prop, evt);
+            string valueStr = FormatPropertyValue(prop, evt);
+            Narration.Say($"{propName}: {valueStr}", NarrationCategory.Navigation);
+        }
+
+        /// <summary>
+        /// 调节属性值
+        /// </summary>
+        private void AdjustProperty(int direction, bool shift, bool alt)
+        {
+            var editor = scnEditor.instance;
+            if (editor?.selectedControl?.levelEvent == null)
+            {
+                Narration.Say(RDString.Get("eam.event.noSelection"), NarrationCategory.Navigation);
+                return;
+            }
+
+            if (currentPropertyIndex < 0 || adjustableProperties == null ||
+                currentPropertyIndex >= adjustableProperties.Count)
+            {
+                Narration.Say(RDString.Get("eam.quickAdjust.noProperty"), NarrationCategory.Navigation);
+                return;
+            }
+
+            var evt = editor.selectedControl.levelEvent;
+            var prop = adjustableProperties[currentPropertyIndex];
+
+            using (new SaveStateScope())
+            {
+                bool success = false;
+                object? newValue = null;
+
+                // 根据属性类型调节
+                if (prop is IntPropertyInfo intProp)
+                {
+                    int current = (int)prop.propertyInfo.GetValue(evt);
+                    newValue = Mathf.Clamp(current + direction, intProp.min, intProp.max);
+                    success = true;
+                }
+                else if (prop is FloatPropertyInfo floatProp)
+                {
+                    float step = alt ? 0.001f : (shift ? 0.01f : 0.1f);
+                    float current = (float)prop.propertyInfo.GetValue(evt);
+                    newValue = Mathf.Clamp(current + direction * step, floatProp.min, floatProp.max);
+                    success = true;
+                }
+                else if (prop is EnumPropertyInfo enumProp)
+                {
+                    object current = prop.propertyInfo.GetValue(evt);
+                    Array values = Enum.GetValues(enumProp.enumType);
+                    int currentIndex = Array.IndexOf(values, current);
+                    int nextIndex = (currentIndex + direction + values.Length) % values.Length;
+                    newValue = values.GetValue(nextIndex);
+                    success = true;
+                }
+                else if (prop is BoolPropertyInfo)
+                {
+                    bool current = (bool)prop.propertyInfo.GetValue(evt);
+                    newValue = !current;
+                    success = true;
+                }
+                else if (prop is NullablePropertyInfo nullableProp)
+                {
+                    // 处理可空类型
+                    object? current = prop.propertyInfo.GetValue(evt);
+                    if (current == null)
+                    {
+                        // 设置为默认值
+                        if (nullableProp.underlyingPropertyInfo is IntPropertyInfo intP)
+                            newValue = intP.min;
+                        else if (nullableProp.underlyingPropertyInfo is FloatPropertyInfo floatP)
+                            newValue = floatP.min;
+                        success = true;
+                    }
+                    else
+                    {
+                        // 按底层类型调节（简化：直接设为 null）
+                        newValue = null;
+                        success = true;
+                    }
+                }
+
+                if (success)
+                {
+                    prop.propertyInfo.SetValue(evt, newValue);
+                }
+            }
+
+            // 更新 UI
+            editor.selectedControl.UpdateUI();
+            editor.inspectorPanelManager.GetCurrent()?.UpdateUI(evt);
+
+            // 重新获取可调节属性列表（因为属性值变化可能影响其他属性的 enableIf 条件）
+            var oldProp = prop;
+            adjustableProperties = GetAdjustableProperties(evt);
+
+            // 尝试保持当前属性的选中状态
+            currentPropertyIndex = adjustableProperties.IndexOf(oldProp);
+            if (currentPropertyIndex < 0 && adjustableProperties.Count > 0)
+            {
+                // 如果当前属性不再可用，选择第一个属性
+                currentPropertyIndex = 0;
+            }
+
+            // 朗读新值
+            string valueStr = FormatPropertyValue(oldProp, evt);
+            Narration.Say(valueStr, NarrationCategory.Navigation);
+        }
+
+        /// <summary>
+        /// 获取属性的本地化名称
+        /// </summary>
+        private string GetLocalizedPropertyName(BasePropertyInfo prop, LevelEvent_Base evt)
+        {
+            string propertyName = prop.name;
+
+            // 如果有自定义本地化键，直接使用
+            if (!string.IsNullOrEmpty(prop.customLocalizationKey))
+            {
+                return RDString.Get(prop.customLocalizationKey);
+            }
+
+            // 尝试特定于事件类型的键: editor.{eventType}.{propertyName}
+            string specificKey = $"editor.{evt.type}.{propertyName}";
+            string localized = RDString.GetWithCheck(specificKey, out bool exists);
+            if (exists)
+                return localized;
+
+            // 尝试通用键: editor.{propertyName}
+            string genericKey = $"editor.{propertyName}";
+            localized = RDString.GetWithCheck(genericKey, out exists);
+            if (exists)
+                return localized;
+
+            // 如果都没有找到，返回原始属性名
+            return propertyName;
+        }
+
+        /// <summary>
+        /// 格式化属性值
+        /// </summary>
+        private string FormatPropertyValue(BasePropertyInfo prop, LevelEvent_Base evt)
+        {
+            object? value = prop.propertyInfo.GetValue(evt);
+
+            if (value == null)
+                return "null";
+
+            if (prop is BoolPropertyInfo)
+            {
+                bool boolValue = (bool)value;
+                return RDString.Get(boolValue ? "eam.bool.enabled" : "eam.bool.disabled");
+            }
+
+            if (prop is EnumPropertyInfo enumProp)
+            {
+                // 尝试获取枚举值的本地化
+                string enumKey = $"enum.{enumProp.enumType.Name}.{value}";
+                string localized = RDString.GetWithCheck(enumKey, out bool exists);
+                return exists ? localized : value.ToString() ?? "";
+            }
+
+            if (prop is FloatPropertyInfo)
+                return ((float)value).ToString("F3");
+
+            return value.ToString() ?? "";
         }
 
         /// <summary>
@@ -1782,6 +2073,12 @@ namespace RDLevelEditorAccess
         {
             if (newControl?.levelEvent == null) return;
 
+            // 重置属性索引
+            if (AccessLogic.Instance != null)
+            {
+                AccessLogic.Instance.ResetPropertySelection();
+            }
+
             // 使用新的工具方法朗读事件信息
             ModUtils.AnnounceEventSelection(newControl.levelEvent);
         }
@@ -2073,6 +2370,14 @@ namespace RDLevelEditorAccess
             ["enum.SoundEffect.Cowbell"]         = "牛铃",
             ["enum.SoundEffect.Clap"]            = "拍手",
             ["enum.SoundEffect.Stick"]           = "鼓棒",
+
+            // 属性快速调节
+            ["eam.quickAdjust.noProperty"]       = "未选择属性",
+            ["eam.quickAdjust.notAdjustable"]    = "当前事件没有可调节属性",
+
+            // 布尔值
+            ["eam.bool.enabled"]                 = "启用",
+            ["eam.bool.disabled"]                = "禁用",
         };
 
         private static readonly Dictionary<string, string> _en = new Dictionary<string, string>
@@ -2162,6 +2467,14 @@ namespace RDLevelEditorAccess
             ["enum.SoundEffect.Cowbell"]         = "Cowbell",
             ["enum.SoundEffect.Clap"]            = "Clap",
             ["enum.SoundEffect.Stick"]           = "Stick",
+
+            // 属性快速调节
+            ["eam.quickAdjust.noProperty"]       = "No property selected",
+            ["eam.quickAdjust.notAdjustable"]    = "Current event has no adjustable properties",
+
+            // 布尔值
+            ["eam.bool.enabled"]                 = "Enabled",
+            ["eam.bool.disabled"]                = "Disabled",
         };
 
         [HarmonyPrefix]
