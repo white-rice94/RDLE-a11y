@@ -1077,7 +1077,7 @@ namespace RDLevelEditorAccess.IPC
                 string charName = row.character == Character.Custom
                     ? (row.customCharacterName ?? "?")
                     : RDString.Get($"enum.Character.{row.character}.short");
-                string roomDisplay = string.Format(RDString.Get("eam.room.option"), row.room + 1);
+                string roomDisplay = RDString.Get("editor.roomIndex").Replace("[index]", (row.room + 1).ToString());
                 opts[i + offset] = i.ToString();
                 localOpts[i + offset] = $"{i + 1} {charName} {roomDisplay}";
             }
