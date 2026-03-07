@@ -65,7 +65,7 @@ namespace RDEventEditorHelper
                     : editType == "jump"
                         ? "跳转到位置 (Jump to Position)"
                         : $"编辑事件 (Edit Event): {sourceData?.eventType}";
-            editorForm.SetData(sourceData?.eventType, sourceData?.properties, title, sourceData?.levelAudioFiles, sourceData?.levelDirectory, sourceData?.localizedLevelAudioFiles, sessionToken);
+            editorForm.SetData(sourceData?.eventType, sourceData?.properties, title, sourceData?.levelAudioFiles, sourceData?.levelDirectory, sourceData?.localizedLevelAudioFiles, sessionToken, sourceData?.internalSongs);
 
             editorForm.OnOK += (updates) =>
             {
@@ -130,6 +130,7 @@ namespace RDEventEditorHelper
             public string[] levelAudioFiles;  // 关卡目录中的音频文件名列表
             public string[] localizedLevelAudioFiles;  // 本地化的音频文件显示名称
             public string levelDirectory;  // 关卡目录路径
+            public System.Collections.Generic.Dictionary<string, string> internalSongs;  // 内置音乐列表 (filename -> displayName)
         }
 
         private class ResultData

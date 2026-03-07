@@ -129,6 +129,10 @@ namespace RDEventEditorHelper
                 return;
             }
 
+            // 先停止之前的声音
+            SendStopSoundRequest();
+            System.Threading.Thread.Sleep(50);  // 等待停止请求被处理
+
             string requestPath = Path.Combine(TempDir, "playSoundRequest.json");
 
             // 确保temp目录存在
@@ -157,6 +161,42 @@ namespace RDEventEditorHelper
                 Debug.WriteLine($"[FileIPC] SendPlaySoundRequest failed: {ex.Message}");
             }
         }
+
+        /// <summary>
+        /// 向 Mod 发送停止声音请求（单向通信，无需等待响应）
+        /// </summary>
+        public static void SendStopSoundRequest()
+        {
+            if (string.IsNullOrEmpty(_currentToken))
+            {
+                Debug.WriteLine("[FileIPC] Cannot send stop sound request: token not set");
+                return;
+            }
+
+            string requestPath = Path.Combine(TempDir, "stopSoundRequest.json");
+
+            // 确保temp目录存在
+            if (!Directory.Exists(TempDir))
+                Directory.CreateDirectory(TempDir);
+
+            try
+            {
+                var request = new
+                {
+                    token = _currentToken
+                };
+
+                string json = JsonConvert.SerializeObject(request, Formatting.Indented);
+                File.WriteAllText(requestPath, json);
+
+                Debug.WriteLine("[FileIPC] Sent stop sound request");
+            }
+            catch (Exception ex)
+            {
+                // 静默失败，不影响主流程
+                Debug.WriteLine($"[FileIPC] SendStopSoundRequest failed: {ex.Message}");
+            }
+        }
     }
 
     public class EditorForm : Form
@@ -168,6 +208,7 @@ namespace RDEventEditorHelper
         private string[] _levelAudioFiles;
         private string[] _localizedLevelAudioFiles;  // 本地化的音频文件显示名称
         private string _levelDirectory;
+        private static Dictionary<string, string> _internalSongs;  // 内置音乐列表
         private Dictionary<string, Control> _controls = new Dictionary<string, Control>();
         private bool _isClosingByButton = false;
         private string _pendingExecuteMethod = null;  // 点击操作按钮时要执行的方法名
@@ -239,13 +280,14 @@ namespace RDEventEditorHelper
             };
         }
 
-        public void SetData(string eventType, PropertyData[] properties, string title = null, string[] levelAudioFiles = null, string levelDirectory = null, string[] localizedLevelAudioFiles = null, string token = null)
+        public void SetData(string eventType, PropertyData[] properties, string title = null, string[] levelAudioFiles = null, string levelDirectory = null, string[] localizedLevelAudioFiles = null, string token = null, Dictionary<string, string> internalSongs = null)
         {
             _eventType = eventType;
             _properties = properties;
             _levelAudioFiles = levelAudioFiles;
             _localizedLevelAudioFiles = localizedLevelAudioFiles ?? levelAudioFiles;  // 如果没有本地化，使用原始名称
             _levelDirectory = levelDirectory;
+            _internalSongs = internalSongs;
             this.Text = title ?? $"编辑事件 (Edit Event): {eventType}";
 
             // 使用传入的 token（如果提供），否则使用自己生成的
@@ -816,7 +858,27 @@ namespace RDEventEditorHelper
                                 if (rawSoundOptions[i] == soundFilename) item.Selected = true;
                             }
                         }
-                        
+
+                        // 填充内置音乐（仅当 itsASong = true 时）
+                        if (prop.itsASong && _internalSongs != null && _internalSongs.Count > 0)
+                        {
+                            foreach (var kvp in _internalSongs.OrderBy(x => x.Value))
+                            {
+                                string filename = kvp.Key;
+                                string songDisplayName = kvp.Value;
+
+                                // 检查是否已在列表中（避免重复）
+                                bool alreadyInList = listView.Items.Cast<ListViewItem>()
+                                    .Any(item => string.Equals(item.Tag as string, filename, StringComparison.OrdinalIgnoreCase));
+                                if (alreadyInList) continue;
+
+                                var lvItem = new ListViewItem(songDisplayName);
+                                lvItem.Tag = filename;
+                                listView.Items.Add(lvItem);
+                                if (filename == soundFilename) lvItem.Selected = true;
+                            }
+                        }
+
                         // 填充关卡目录音频文件
                         if (_levelAudioFiles != null)
                         {

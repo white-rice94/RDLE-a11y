@@ -76,6 +76,13 @@ namespace RDLevelEditorAccess.IPC
                 ).ToArray();
             }
 
+            // 如果有音乐属性（itsASong = true），添加内置音乐列表
+            bool hasMusic = properties.Any(p => p.type == "SoundData" && p.itsASong);
+            if (hasMusic)
+            {
+                sourceData.internalSongs = GetInternalSongs();
+            }
+
             try
             {
                 var options = new JsonSerializerOptions { WriteIndented = true, IncludeFields = true };
@@ -132,6 +139,13 @@ namespace RDLevelEditorAccess.IPC
                 sourceData.localizedLevelAudioFiles = sourceData.levelAudioFiles.Select(filename =>
                     System.IO.Path.GetFileNameWithoutExtension(filename)
                 ).ToArray();
+            }
+
+            // 如果有音乐属性（itsASong = true），添加内置音乐列表
+            bool hasMusic = properties.Any(p => p.type == "SoundData" && p.itsASong);
+            if (hasMusic)
+            {
+                sourceData.internalSongs = GetInternalSongs();
             }
 
             try
@@ -200,6 +214,9 @@ namespace RDLevelEditorAccess.IPC
 
             // NEW: 处理validateVisibility请求（与result.json处理独立，不中断轮询和键盘锁定）
             PollPropertyValidationRequests();
+
+            // NEW: 处理停止声音请求（单向通信，不影响主流程）
+            PollStopSoundRequests();
 
             // NEW: 处理播放声音请求（单向通信，不影响主流程）
             PollPlaySoundRequests();
@@ -407,6 +424,80 @@ namespace RDLevelEditorAccess.IPC
             catch (Exception ex)
             {
                 Debug.LogError($"[FileIPC] 播放声音请求失败: {ex.Message}");
+                // 错误时也删除文件，避免反复尝试
+                try { File.Delete(requestPath); } catch { }
+            }
+        }
+
+        /// <summary>
+        /// 轮询停止声音请求
+        /// </summary>
+        private void PollStopSoundRequests()
+        {
+            string requestPath = Path.Combine(_tempPath, "stopSoundRequest.json");
+            if (!File.Exists(requestPath)) return;
+
+            try
+            {
+                string json = File.ReadAllText(requestPath);
+                var options = new JsonSerializerOptions { IncludeFields = true };
+                var request = JsonSerializer.Deserialize<StopSoundRequest>(json, options);
+
+                // 验证 token
+                if (request?.token != _sessionToken)
+                {
+                    Debug.LogWarning($"[FileIPC] 停止声音请求 token 不匹配，忽略");
+                    File.Delete(requestPath);
+                    return;
+                }
+
+                Debug.Log($"[FileIPC] 停止所有声音");
+
+                // 使用反射调用 AudioManager.StopAllSounds
+                var audioManagerType = Type.GetType("AudioManager, Assembly-CSharp");
+                if (audioManagerType != null)
+                {
+                    // AudioManager 继承自 Singleton<AudioManager>
+                    var singletonType = typeof(Singleton<>).MakeGenericType(audioManagerType);
+                    var instanceProp = singletonType.GetProperty("Instance",
+                        System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                    if (instanceProp != null)
+                    {
+                        var instance = instanceProp.GetValue(null);
+                        if (instance != null)
+                        {
+                            var stopMethod = audioManagerType.GetMethod("StopAllSounds",
+                                System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                            if (stopMethod != null)
+                            {
+                                stopMethod.Invoke(instance, null);
+                            }
+                            else
+                            {
+                                Debug.LogWarning("[FileIPC] 未找到 StopAllSounds 方法");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogWarning("[FileIPC] AudioManager 实例为 null");
+                        }
+                    }
+                    else
+                    {
+                        Debug.LogWarning("[FileIPC] 未找到 Singleton.Instance 属性");
+                    }
+                }
+                else
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 AudioManager 类型");
+                }
+
+                // 删除请求文件
+                File.Delete(requestPath);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FileIPC] 停止声音请求失败: {ex.Message}");
                 // 错误时也删除文件，避免反复尝试
                 try { File.Delete(requestPath); } catch { }
             }
@@ -1746,6 +1837,83 @@ namespace RDLevelEditorAccess.IPC
             }
         }
 
+        /// <summary>
+        /// 获取游戏内置音乐列表
+        /// </summary>
+        private Dictionary<string, string> GetInternalSongs()
+        {
+            try
+            {
+                var songOffsetsType = Type.GetType("RDSongOffsets, Assembly-CSharp");
+                if (songOffsetsType == null)
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 RDSongOffsets 类型");
+                    return null;
+                }
+
+                var instanceProp = songOffsetsType.GetProperty("instance",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+                if (instanceProp == null)
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 RDSongOffsets.instance 属性");
+                    return null;
+                }
+
+                var instance = instanceProp.GetValue(null);
+                if (instance == null)
+                {
+                    Debug.LogWarning("[FileIPC] RDSongOffsets.instance 为 null");
+                    return null;
+                }
+
+                var miscField = songOffsetsType.GetField("misc",
+                    System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+                if (miscField == null)
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 RDSongOffsets.misc 字段");
+                    return null;
+                }
+
+                var miscList = miscField.GetValue(instance) as System.Collections.IList;
+                if (miscList == null)
+                {
+                    Debug.LogWarning("[FileIPC] RDSongOffsets.misc 为 null 或不是列表");
+                    return null;
+                }
+
+                var result = new Dictionary<string, string>();
+                var songOffsetType = Type.GetType("SongOffset, Assembly-CSharp");
+                var nameField = songOffsetType?.GetField("name");
+
+                if (nameField == null)
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 SongOffset.name 字段");
+                    return null;
+                }
+
+                foreach (var song in miscList)
+                {
+                    if (song == null) continue;
+                    string name = nameField.GetValue(song) as string;
+                    if (!string.IsNullOrEmpty(name))
+                    {
+                        // 使用本地化键获取显示名称
+                        string displayName = RDString.GetWithCheck($"song.{name}", out bool exists);
+                        if (!exists) displayName = name;
+                        result[name] = displayName;
+                    }
+                }
+
+                Debug.Log($"[FileIPC] 获取到 {result.Count} 个内置音乐");
+                return result;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"[FileIPC] 获取内置音乐列表失败: {ex.Message}");
+                return null;
+            }
+        }
+
         private string GetLevelDirectory()
         {
             try
@@ -1772,6 +1940,7 @@ namespace RDLevelEditorAccess.IPC
             public string[] levelAudioFiles;  // 关卡目录中的音频文件名列表
             public string[] localizedLevelAudioFiles;  // 关卡音频文件的本地化显示名称
             public string levelDirectory;  // 关卡目录路径
+            public Dictionary<string, string> internalSongs;  // 内置音乐列表 (filename -> displayName)
         }
 
         [Serializable]
@@ -1794,6 +1963,15 @@ namespace RDLevelEditorAccess.IPC
             public int volume;        // 音量 (0-100)
             public int pitch;         // 音调 (0-200)
             public int pan;           // 声像 (-100 到 100)
+        }
+
+        /// <summary>
+        /// 停止声音请求数据类
+        /// </summary>
+        [Serializable]
+        private class StopSoundRequest
+        {
+            public string token;      // 会话特征码
         }
 
         [Serializable]
