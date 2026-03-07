@@ -1236,8 +1236,8 @@ namespace RDLevelEditorAccess
             virtualMenuState = VirtualMenuState.EventTypeSelect;
             virtualMenuIndex = 0;
 
-            Narration.Say(RDString.Get("eam.event.selectPrompt"), NarrationCategory.Instruction);
             Narration.Say(GetEventTypeName(eventTypes[0]), NarrationCategory.Navigation);
+            Narration.Say(RDString.Get("eam.event.selectPrompt"), NarrationCategory.Instruction);
         }
 
         /// <summary>
@@ -1263,30 +1263,8 @@ namespace RDLevelEditorAccess
                 Narration.Say(GetEventTypeName(eventTypes[virtualMenuIndex]), NarrationCategory.Navigation);
             }
             
-            // 首字母跳转
-            foreach (KeyCode key in Enum.GetValues(typeof(KeyCode)))
-            {
-                string keyName = key.ToString();
-                if (keyName.Length == 1 && char.IsLetter(keyName[0]))
-                {
-                    if (Input.GetKeyDown(key))
-                    {
-                        char pressedChar = keyName[0];
-                        for (int i = 0; i < eventTypes.Count; i++)
-                        {
-                            string typeName = eventTypes[i].ToString();
-                            if (typeName.StartsWith(pressedChar.ToString(), StringComparison.OrdinalIgnoreCase))
-                            {
-                                virtualMenuIndex = i;
-                                Narration.Say(GetEventTypeName(eventTypes[virtualMenuIndex]), NarrationCategory.Navigation);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
             
-            // 回车确认 - 直接创建事件（使用默认值）并打开 Helper
+            // 回车确认 - 直接创建事件（使用默认值）
             if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.KeypadEnter))
             {
                 selectedEventType = eventTypes[virtualMenuIndex];
@@ -1623,7 +1601,7 @@ namespace RDLevelEditorAccess
         }
 
         /// <summary>
-        /// 创建事件并打开 Helper 编辑
+        /// 创建事件
         /// </summary>
         private void CreateEventAndEdit(LevelEventType eventType, int bar, float beat, int row)
         {
@@ -1677,10 +1655,7 @@ namespace RDLevelEditorAccess
             editor.SelectEventControl(control, true);
             
             Narration.Say(string.Format(RDString.Get("eam.event.createdAndOpening"), GetEventTypeName(eventType)), NarrationCategory.Navigation);
-            
-            // 自动打开 Helper 编辑
-            AccessibilityBridge.EditEvent(levelEvent);
-        }
+                    }
 
         /// <summary>
         /// 获取当前 Tab 可用的事件类型
@@ -1713,7 +1688,8 @@ namespace RDLevelEditorAccess
         /// </summary>
         private string GetEventTypeName(LevelEventType eventType)
         {
-            return RDString.Get($"editor.{eventType}");
+            string str = RDString.GetWithCheck($"editor.{eventType}", out bool exists);
+            return exists ? str : eventType.ToString();
         }
 
         /// <summary>
