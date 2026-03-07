@@ -1001,13 +1001,28 @@ namespace RDLevelEditorAccess.IPC
                 if (row.pulseSound != null)
                 {
                     string pulseSoundValue = $"{row.pulseSound.filename ?? "Shaker"}|{row.pulseSound.volume}|{row.pulseSound.pitch}|{row.pulseSound.pan}|{row.pulseSound.offset}";
+                    var soundOptions = RDEditorConstants.BeatSounds.Select(s => s.ToString()).ToArray();
+
+                    // 获取本地化名称
+                    string displayName = RDString.GetWithCheck("editor.MakeRow.pulseSound", out bool exists);
+                    if (!exists)
+                    {
+                        displayName = "pulseSound";
+                    }
+
                     list.Add(new PropertyData
                     {
                         name = "pulseSound",
-                        displayName = RDString.Get("editor.MakeRow.pulseSound"),
+                        displayName = displayName,
                         type = "SoundData",
                         value = pulseSoundValue,
-                        soundOptions = RDEditorConstants.BeatSounds.Select(s => s.ToString()).ToArray(),
+                        soundOptions = soundOptions,
+                        localizedSoundOptions = soundOptions.Select(name =>
+                        {
+                            string key = $"enum.SoundEffect.{name}";
+                            string localized = RDString.GetWithCheck(key, out bool localExists);
+                            return localExists ? localized : name;
+                        }).ToArray(),
                         allowCustomFile = true,
                         itsASong = false,
                         isVisible = true
@@ -1015,10 +1030,16 @@ namespace RDLevelEditorAccess.IPC
                 }
 
                 // mimicsRow 字段（控制 rowToMimic 的可见性）
+                string mimicsRowDisplayName = RDString.GetWithCheck("editor.MakeRow.mimicsRow", out bool mimicsRowExists);
+                if (!mimicsRowExists)
+                {
+                    mimicsRowDisplayName = "mimicsRow";
+                }
+
                 list.Add(new PropertyData
                 {
                     name = "mimicsRow",
-                    displayName = RDString.Get("editor.MakeRow.mimicsRow"),
+                    displayName = mimicsRowDisplayName,
                     type = "Bool",
                     value = row.mimicsRow ? "true" : "false",
                     isVisible = true
@@ -1027,10 +1048,16 @@ namespace RDLevelEditorAccess.IPC
                 // customCharacterName 字段（仅当 character == Custom 时可见）
                 if (row.character == Character.Custom)
                 {
+                    string customCharDisplayName = RDString.GetWithCheck("editor.MakeRow.customCharacterName", out bool customCharExists);
+                    if (!customCharExists)
+                    {
+                        customCharDisplayName = "customCharacterName";
+                    }
+
                     list.Add(new PropertyData
                     {
                         name = "customCharacterName",
-                        displayName = RDString.Get("editor.MakeRow.customCharacterName"),
+                        displayName = customCharDisplayName,
                         type = "String",
                         value = row.customCharacterName ?? "",
                         isVisible = true
