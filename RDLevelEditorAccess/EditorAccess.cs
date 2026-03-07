@@ -125,6 +125,13 @@ namespace RDLevelEditorAccess
 
             if (scnEditor.instance == null) return;
 
+            // --- 虚拟菜单优先处理（最高优先级）---
+            if (virtualMenuState != VirtualMenuState.None)
+            {
+                HandleVirtualMenu();
+                return;
+            }
+
             if (Input.GetKeyDown(KeyCode.F1))
             {
                 Debug.Log($"编辑状态： {scnEditor.instance.userIsEditingAnInputField}， 当前菜单： {currentMenu}");
@@ -229,6 +236,9 @@ namespace RDLevelEditorAccess
         private void HandleGeneralUINavigation(GameObject rootObject, string menuName)
         {
             if (rootObject == null) return;
+
+            // 如果虚拟菜单激活，不处理 UI 导航
+            if (virtualMenuState != VirtualMenuState.None) return;
 
             // --- [修复 1] 输入框防冲突保护 ---
             // 如果焦点当前在一个输入框内，并且正在编辑，绝对不要拦截方向键，否则玩家没法移动光标改字
@@ -2185,14 +2195,26 @@ namespace RDLevelEditorAccess
             links = new List<LinkInfo>();
             if (string.IsNullOrEmpty(rawText)) return rawText;
 
+            // 显示前300个字符用于调试
+            string sample = rawText.Length > 300 ? rawText.Substring(0, 300) : rawText;
+            Debug.Log($"[ProcessRichText] 原始文本长度: {rawText.Length}");
+            Debug.Log($"[ProcessRichText] 文本样本: {sample}");
+
             string processed = rawText;
 
-            // 1. 提取链接信息
-            var linkPattern = @"<link\s*=\s*""([^""]+)"">([^<]+)</link>";
-            var linkMatches = System.Text.RegularExpressions.Regex.Matches(processed, linkPattern);
+            // 1. 提取链接信息 - 使用更宽松的模式，支持单引号和双引号
+            var linkPattern = @"<link\s*=\s*[""']([^""']+)[""']\s*>(.+?)</link>";
+            var linkMatches = System.Text.RegularExpressions.Regex.Matches(
+                processed,
+                linkPattern,
+                System.Text.RegularExpressions.RegexOptions.Singleline
+            );
+
+            Debug.Log($"[ProcessRichText] 找到 {linkMatches.Count} 个链接");
 
             foreach (System.Text.RegularExpressions.Match match in linkMatches)
             {
+                Debug.Log($"[ProcessRichText] 找到链接: url={match.Groups[1].Value}, text={match.Groups[2].Value}");
                 links.Add(new LinkInfo
                 {
                     url = match.Groups[1].Value,
@@ -2208,6 +2230,8 @@ namespace RDLevelEditorAccess
                 linkPattern,
                 $"…$2{linkSuffix}…"
             );
+
+            Debug.Log($"[ProcessRichText] 处理后文本长度: {processed.Length}");
 
             // 3. 移除其他富文本标签
             // 移除 <color> 标签（包括十六进制和命名颜色）
