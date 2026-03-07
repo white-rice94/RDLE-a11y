@@ -121,7 +121,7 @@ namespace RDEventEditorHelper
         /// <summary>
         /// 向 Mod 发送播放声音请求（单向通信，无需等待响应）
         /// </summary>
-        public static void SendPlaySoundRequest(string soundName, int volume, int pitch, int pan)
+        public static void SendPlaySoundRequest(string soundName, int volume, int pitch, int pan, bool itsASong)
         {
             if (string.IsNullOrEmpty(_currentToken))
             {
@@ -147,13 +147,14 @@ namespace RDEventEditorHelper
                     soundName = soundName,
                     volume = volume,
                     pitch = pitch,
-                    pan = pan
+                    pan = pan,
+                    itsASong = itsASong
                 };
 
                 string json = JsonConvert.SerializeObject(request, Formatting.Indented);
                 File.WriteAllText(requestPath, json);
 
-                Debug.WriteLine($"[FileIPC] Sent play sound request: {soundName}");
+                Debug.WriteLine($"[FileIPC] Sent play sound request: {soundName} (itsASong: {itsASong})");
             }
             catch (Exception ex)
             {
@@ -968,7 +969,7 @@ namespace RDEventEditorHelper
                                 if (panTxt != null && int.TryParse(panTxt.Text, out int pn)) pan = pn;
 
                                 // 发送播放请求
-                                FileIPC.SendPlaySoundRequest(rawSoundName, volume, pitch, pan);
+                                FileIPC.SendPlaySoundRequest(rawSoundName, volume, pitch, pan, prop.itsASong);
                             }
                         };
 

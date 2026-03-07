@@ -387,14 +387,14 @@ namespace RDLevelEditorAccess.IPC
                 float pitch = request.pitch / 100f;
                 float pan = request.pan / 100f;
 
-                // 音效名称需要添加 "snd" 前缀（游戏内部约定）
+                // 如果是音效（不是音乐），需要添加 "snd" 前缀（游戏内部约定）
                 string soundName = request.soundName;
-                if (!soundName.StartsWith("snd") && !soundName.Contains("."))
+                if (!request.itsASong && !soundName.StartsWith("snd") && !soundName.Contains("."))
                 {
                     soundName = "snd" + soundName;
                 }
 
-                Debug.Log($"[FileIPC] 播放声音: {soundName} (原始: {request.soundName}), 音量={volume}, 音调={pitch}, 声像={pan}");
+                Debug.Log($"[FileIPC] 播放声音: {soundName} (原始: {request.soundName}, 是音乐: {request.itsASong}), 音量={volume}, 音调={pitch}, 声像={pan}");
 
                 // 使用反射调用 scrConductor.PlayImmediatelyLevelEditor
                 // 这个方法专门为关卡编辑器设计，会忽略 AudioListener 的暂停状态
@@ -451,13 +451,13 @@ namespace RDLevelEditorAccess.IPC
                     return;
                 }
 
-                Debug.Log($"[FileIPC] 停止所有声音");
+                Debug.Log($"[FileIPC] 停止所有预览声音");
 
-                // 使用反射调用 AudioManager.StopAllSounds
+                // 使用反射访问 AudioManager.liveSources 列表并停止所有声音
+                // 不能使用 StopAllSounds 方法，因为它在遍历时删除元素有 bug
                 var audioManagerType = Type.GetType("AudioManager, Assembly-CSharp");
                 if (audioManagerType != null)
                 {
-                    // AudioManager 继承自 Singleton<AudioManager>
                     var singletonType = typeof(Singleton<>).MakeGenericType(audioManagerType);
                     var instanceProp = singletonType.GetProperty("Instance",
                         System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
@@ -466,15 +466,44 @@ namespace RDLevelEditorAccess.IPC
                         var instance = instanceProp.GetValue(null);
                         if (instance != null)
                         {
-                            var stopMethod = audioManagerType.GetMethod("StopAllSounds",
+                            // 获取 liveSources 字段（public 字段）
+                            var liveSourcesField = audioManagerType.GetField("liveSources",
                                 System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
-                            if (stopMethod != null)
+                            if (liveSourcesField != null)
                             {
-                                stopMethod.Invoke(instance, null);
+                                var liveSources = liveSourcesField.GetValue(instance) as System.Collections.IList;
+                                if (liveSources != null)
+                                {
+                                    Debug.Log($"[FileIPC] 找到 {liveSources.Count} 个 AudioSource");
+
+                                    // 先收集所有要停止的 AudioSource（避免在遍历时修改列表）
+                                    var sourcesToStop = new System.Collections.Generic.List<AudioSource>();
+                                    foreach (var source in liveSources)
+                                    {
+                                        if (source is AudioSource audioSource && audioSource != null)
+                                        {
+                                            sourcesToStop.Add(audioSource);
+                                        }
+                                    }
+
+                                    // 停止并销毁所有 AudioSource
+                                    foreach (var audioSource in sourcesToStop)
+                                    {
+                                        audioSource.Stop();
+                                        UnityEngine.Object.Destroy(audioSource.gameObject);
+                                    }
+
+                                    // 清空列表
+                                    liveSources.Clear();
+                                }
+                                else
+                                {
+                                    Debug.LogWarning("[FileIPC] liveSources 为 null");
+                                }
                             }
                             else
                             {
-                                Debug.LogWarning("[FileIPC] 未找到 StopAllSounds 方法");
+                                Debug.LogWarning("[FileIPC] 未找到 liveSources 字段");
                             }
                         }
                         else
@@ -1884,6 +1913,7 @@ namespace RDLevelEditorAccess.IPC
                 var result = new Dictionary<string, string>();
                 var songOffsetType = Type.GetType("SongOffset, Assembly-CSharp");
                 var nameField = songOffsetType?.GetField("name");
+                var folderField = songOffsetType?.GetField("folder");
 
                 if (nameField == null)
                 {
@@ -1891,9 +1921,21 @@ namespace RDLevelEditorAccess.IPC
                     return null;
                 }
 
+                if (folderField == null)
+                {
+                    Debug.LogWarning("[FileIPC] 未找到 SongOffset.folder 字段");
+                    return null;
+                }
+
                 foreach (var song in miscList)
                 {
                     if (song == null) continue;
+
+                    // 排除 Sfx/ 文件夹中的文件（音效），包含其他所有文件（音乐）
+                    string folder = folderField.GetValue(song) as string;
+                    if (!string.IsNullOrEmpty(folder) && folder.StartsWith("Sfx/"))
+                        continue;
+
                     string name = nameField.GetValue(song) as string;
                     if (!string.IsNullOrEmpty(name))
                     {
@@ -1963,6 +2005,7 @@ namespace RDLevelEditorAccess.IPC
             public int volume;        // 音量 (0-100)
             public int pitch;         // 音调 (0-200)
             public int pan;           // 声像 (-100 到 100)
+            public bool itsASong;     // 是否是音乐（true=音乐，false=音效）
         }
 
         /// <summary>
