@@ -1,3 +1,12 @@
+1.3 (2026-03-07)
+1. Added a set of shortcuts to perform simple edits on event properties without opening the helper. (See section 4.5.2 of the manual)
+2. Optimized row editing, now supports more properties.
+3. When selecting music, you can now choose from all built-in music in the game.
+4. Fixed a bug where audio files in the level directory could not be previewed.
+5. Added support for rich text tags in UI. If there are links in the currently focused option, you can press space to open the selection menu, then use up/down arrows to select, and press enter to open in the default browser.
+6. Creating new events no longer automatically opens the helper.
+7. If the localization key for an event name is not found, the internal name will be used by default.
+
 1.1.2 (2026-03-05)
 1. Helper now supports pressing space to preview selected sound effects in sound selection.
 2. Helper's sound list now displays localized names instead of internal names.
