@@ -27,7 +27,10 @@
     - [4.2 Timeline Navigation](#42-timeline-navigation)
     - [4.3 Creating Rows and Events](#43-creating-rows-and-events)
     - [4.4 Edit Cursor](#44-edit-cursor)
-    - [4.5 Quick Event Movement](#45-quick-event-movement)
+    - [4.5 Editing Events](#45-editing-events)
+      - [4.5.1 Moving Events](#451-moving-events)
+      - [4.5.2 Editing Event Properties](#452-editing-event-properties)
+      - [4.5.3 Advanced Editing](#453-advanced-editing)
     - [4.6 Editing Level Metadata](#46-editing-level-metadata)
   - [5. External Editor (RDEventEditorHelper)](#5-external-editor-rdeventeditorhelper)
     - [5.1 What is this?](#51-what-is-this)
@@ -138,7 +141,7 @@ If you can't wait to show off your skills and create a level, please don't rush.
 
 ### 4.1 Menu/Dialog Navigation
 
-In any dialog/menu, you can press arrow keys to browse controls, and enter to confirm. Press tab to switch between clickable items.
+In any dialog/menu, you can press arrow keys to browse controls, and enter to confirm. Press tab to switch between clickable items. If there are links in the text, you can press the space key to open the link list, use up/down arrows to select a link, and press enter to open it in the browser.
 
 When in the level editor main interface, you can press f10 to open/close the editor's main menu. In this menu, you can create new levels, open levels, publish levels, and other operations. Of course, most of these operations have more convenient shortcuts, see the appendix.
 
@@ -173,12 +176,14 @@ In addition to quick jumping, the edit cursor's applicable scope also includes:
 - The target position when pasting events
 - More scenarios to be expanded in the future
 
-### 4.5 Quick Event Movement
+### 4.5 Editing Events
 
-If you don't want to press ctrl+enter just to fine-tune an event's position, the mod also provides simple adjustment shortcuts. This set of shortcuts, aside from different keys and different adjustment targets, has a lot in common with the edit cursor. As follows:
+#### 4.5.1 Moving Events
 
-- z, move event forward by 1 beat (also supports shift, alt, or shift and alt modifier keys)
-- x, move event backward by 1 beat (also supports shift, alt, or shift and alt modifier keys)
+The mod provides a simple set of shortcuts to adjust the beat position of events. This set of shortcuts, aside from different keys and different adjustment targets, has a lot in common with the edit cursor. As follows:
+
+- z, move event forward by 1 beat (also supports modifier keys)
+- x, move event backward by 1 beat (also supports modifier keys)
 - c, snap event to the nearest half beat
 
 Note 1: If the selected event doesn't have a beat property, pressing z and x will change to moving forward/backward by 1 bar, and modifier keys are not supported.
@@ -186,6 +191,22 @@ Note 1: If the selected event doesn't have a beat property, pressing z and x wil
 Note 2: The above shortcuts are effective for all selected events.
 
 Note 3: If the selected events include both events with beat properties and events without beat properties, they cannot be moved.
+
+#### 4.5.2 Editing Event Properties
+
+There is also a set of shortcuts to quickly adjust some basic properties of events. As follows:
+
+- e/shift+e, switch the target property to adjust
+- r/t, adjust the property value (if the property has multiple options, it switches between options; if it's a toggle, it switches between enabled/disabled; if it's an integer, the adjustment step is 1 and modifier keys are not supported; if it's a float, the default step is 0.1, add shift for 0.01, add alt for 0.001, add shift and alt for 0.0001)
+
+#### 4.5.3 Advanced Editing
+
+Although the above two sets of shortcuts are convenient, they also have some shortcomings:
+
+1. They cannot adjust all properties.
+2. Although the mod provides modifier keys to increase adjustment precision, it's still not enough in some cases.
+
+Therefore, if you need more precise adjustment, you can press ctrl+enter to open the external editor for editing. For more information about the external editor, please refer to the next chapter.
 
 ### 4.6 Editing Level Metadata
 
@@ -299,10 +320,12 @@ Note: This only lists some commonly used shortcuts, not a complete list. If you 
 | shift+/ | Announce edit cursor's current position | None |
 | ctrl+/ | Snap edit cursor to nearest half beat | None |
 | ctrl+shift+/ | Open edit cursor jump dialog | None |
-| alt+slash | Jump to edit cursor's position and start playing | None |
+| alt+/ | Jump to edit cursor's position and start playing | None |
 | , (comma) and . (period) | Move edit cursor forward/backward by 1 beat | Add shift for 0.1 beat, add alt for 0.01 beat, add shift and alt for 1 bar. |
-| z/x | Move selected event forward/backward by 1 beat (or 1 bar) | Add shift for 0.1 beat, add alt for 0.01 beat, add shift and alt for 1 bar. See [4.5 Quick Event Movement](#45-quick-event-movement) for details. |
+| z/x | Move selected event forward/backward by 1 beat (or 1 bar) | Add shift for 0.1 beat, add alt for 0.01 beat, add shift and alt for 1 bar. See [4.5.1 Moving Events](#451-moving-events) for details. |
 | c | Snap event to nearest half beat | None |
+| e/shift+e | Switch target property to adjust | See [4.5.2 Editing Event Properties](#452-editing-event-properties) for details. |
+| r/t | Adjust property value | Supports modifier keys, see [4.5.2 Editing Event Properties](#452-editing-event-properties) for details. |
 
 ### 8.3 Contact Information
 

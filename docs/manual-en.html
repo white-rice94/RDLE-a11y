@@ -179,7 +179,13 @@
 <li><a href="#42-timeline-navigation">4.2 Timeline Navigation</a></li>
 <li><a href="#43-creating-rows-and-events">4.3 Creating Rows and Events</a></li>
 <li><a href="#44-edit-cursor">4.4 Edit Cursor</a></li>
-<li><a href="#45-quick-event-movement">4.5 Quick Event Movement</a></li>
+<li><a href="#45-editing-events">4.5 Editing Events</a>
+<ul>
+<li><a href="#451-moving-events">4.5.1 Moving Events</a></li>
+<li><a href="#452-editing-event-properties">4.5.2 Editing Event Properties</a></li>
+<li><a href="#453-advanced-editing">4.5.3 Advanced Editing</a></li>
+</ul>
+</li>
 <li><a href="#46-editing-level-metadata">4.6 Editing Level Metadata</a></li>
 </ul>
 </li>
@@ -274,7 +280,7 @@
 </ol>
 <h2 id="4-operation-instructions">4. Operation Instructions</h2>
 <h3 id="41-menudialog-navigation">4.1 Menu/Dialog Navigation</h3>
-<p>In any dialog/menu, you can press arrow keys to browse controls, and enter to confirm. Press tab to switch between clickable items.</p>
+<p>In any dialog/menu, you can press arrow keys to browse controls, and enter to confirm. Press tab to switch between clickable items. If there are links in the text, you can press the space key to open the link list, use up/down arrows to select a link, and press enter to open it in the browser.</p>
 <p>When in the level editor main interface, you can press f10 to open/close the editor's main menu. In this menu, you can create new levels, open levels, publish levels, and other operations. Of course, most of these operations have more convenient shortcuts, see the appendix.</p>
 <h3 id="42-timeline-navigation">4.2 Timeline Navigation</h3>
 <p>On the editing page, left/right arrow keys switch between events in the current tab, enter jumps to the event's location and plays, ctrl+enter edits event properties.</p>
@@ -300,16 +306,30 @@ PS: I know some people definitely didn't understand the definition of edit curso
 <li>The target position when pasting events</li>
 <li>More scenarios to be expanded in the future</li>
 </ul>
-<h3 id="45-quick-event-movement">4.5 Quick Event Movement</h3>
-<p>If you don't want to press ctrl+enter just to fine-tune an event's position, the mod also provides simple adjustment shortcuts. This set of shortcuts, aside from different keys and different adjustment targets, has a lot in common with the edit cursor. As follows:</p>
+<h3 id="45-editing-events">4.5 Editing Events</h3>
+<h4 id="451-moving-events">4.5.1 Moving Events</h4>
+<p>The mod provides a simple set of shortcuts to adjust the beat position of events. This set of shortcuts, aside from different keys and different adjustment targets, has a lot in common with the edit cursor. As follows:</p>
 <ul>
-<li>z, move event forward by 1 beat (also supports shift, alt, or shift and alt modifier keys)</li>
-<li>x, move event backward by 1 beat (also supports shift, alt, or shift and alt modifier keys)</li>
+<li>z, move event forward by 1 beat (also supports modifier keys)</li>
+<li>x, move event backward by 1 beat (also supports modifier keys)</li>
 <li>c, snap event to the nearest half beat</li>
 </ul>
 <p>Note 1: If the selected event doesn't have a beat property, pressing z and x will change to moving forward/backward by 1 bar, and modifier keys are not supported.</p>
 <p>Note 2: The above shortcuts are effective for all selected events.</p>
 <p>Note 3: If the selected events include both events with beat properties and events without beat properties, they cannot be moved.</p>
+<h4 id="452-editing-event-properties">4.5.2 Editing Event Properties</h4>
+<p>There is also a set of shortcuts to quickly adjust some basic properties of events. As follows:</p>
+<ul>
+<li>e/shift+e, switch the target property to adjust</li>
+<li>r/t, adjust the property value (if the property has multiple options, it switches between options; if it's a toggle, it switches between enabled/disabled; if it's an integer, the adjustment step is 1 and modifier keys are not supported; if it's a float, the default step is 0.1, add shift for 0.01, add alt for 0.001, add shift and alt for 0.0001)</li>
+</ul>
+<h4 id="453-advanced-editing">4.5.3 Advanced Editing</h4>
+<p>Although the above two sets of shortcuts are convenient, they also have some shortcomings:</p>
+<ol>
+<li>They cannot adjust all properties.</li>
+<li>Although the mod provides modifier keys to increase adjustment precision, it's still not enough in some cases.</li>
+</ol>
+<p>Therefore, if you need more precise adjustment, you can press ctrl+enter to open the external editor for editing. For more information about the external editor, please refer to the next chapter.</p>
 <h3 id="46-editing-level-metadata">4.6 Editing Level Metadata</h3>
 <p>On the main page, you can press number key 0 on the main keyboard at any time to open the metadata editing page. Here you can edit some basic information about the level.</p>
 <h2 id="5-external-editor-rdeventeditorhelper">5. External Editor (RDEventEditorHelper)</h2>
@@ -589,7 +609,7 @@ and try installing it.</p>
 <td>None</td>
 </tr>
 <tr>
-<td>alt+slash</td>
+<td>alt+/</td>
 <td>Jump to edit cursor's position and start playing</td>
 <td>None</td>
 </tr>
@@ -601,12 +621,22 @@ and try installing it.</p>
 <tr>
 <td>z/x</td>
 <td>Move selected event forward/backward by 1 beat (or 1 bar)</td>
-<td>Add shift for 0.1 beat, add alt for 0.01 beat, add shift and alt for 1 bar. See <a href="#45-quick-event-movement">4.5 Quick Event Movement</a> for details.</td>
+<td>Add shift for 0.1 beat, add alt for 0.01 beat, add shift and alt for 1 bar. See <a href="#451-moving-events">4.5.1 Moving Events</a> for details.</td>
 </tr>
 <tr>
 <td>c</td>
 <td>Snap event to nearest half beat</td>
 <td>None</td>
+</tr>
+<tr>
+<td>e/shift+e</td>
+<td>Switch target property to adjust</td>
+<td>See <a href="#452-editing-event-properties">4.5.2 Editing Event Properties</a> for details.</td>
+</tr>
+<tr>
+<td>r/t</td>
+<td>Adjust property value</td>
+<td>Supports modifier keys, see <a href="#452-editing-event-properties">4.5.2 Editing Event Properties</a> for details.</td>
 </tr>
 </tbody>
 </table>
