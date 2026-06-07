@@ -130,6 +130,12 @@ Native key locations:
 - Editor UI labels: `LevelEditor.bytes` — e.g. `editor.Conditionals.expression`
 - Character names: `Enums.bytes` — e.g. `enum.Character.Ian.short`
 
+**Supported languages for `eam.*` keys**: Chinese (`_zh`), English (`_en`), French (`_fr`). French detection via `IsFrench` property (checks if `RDString.Get("editor.continue") == "Continuer"`). Selection logic in `RDStringPatch.GetPrefix`:
+
+```csharp
+var dict = RDString.isChinese ? _zh : (IsFrench ? _fr : _en);
+```
+
 - `RDString.Get(key)` — goes through `RDStringPatch`, supports `eam.*`
 - `RDString.GetWithCheck(key, out bool exists)` — bypasses patch; use for native keys existence check. Do **not** use for `eam.*` keys.
 
