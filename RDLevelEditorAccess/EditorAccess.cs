@@ -5259,12 +5259,187 @@ namespace RDLevelEditorAccess
             ["eam.filter.firstMatch"]          = "No matching events forward",
         };
 
+        private static readonly Dictionary<string, string> _fr = new Dictionary<string, string>
+        {
+            ["eam.barbeat.format"]              = "Mesure {0} Temps {1}",
+            ["eam.barbeat.beatOnly"]             = "Temps {0}",
+            ["eam.barbeat.barOnly"]              = "Mesure {0}",
+            ["eam.cursor.suffix"]                = " Curseur d'édition",
+            ["eam.cursor.snapPrefix"]            = "Accroché à ",
+            ["eam.action.cancelled"]             = "Annulé",
+            ["eam.check.checked"]                = "Coché",
+            ["eam.check.unchecked"]              = "Non coché",
+            ["eam.input.activated"]              = "Champ de saisie activé",
+            ["eam.editor.openPropEditor"]        = "Ouverture de l'éditeur de propriétés",
+            ["eam.editor.openTrackEditor"]       = "Ouverture de l'éditeur de piste",
+            ["eam.editor.openEventEditor"]       = "Ouverture de l'éditeur de propriétés pour {0}",
+            ["eam.editor.openSettingsEditor"]    = "Ouverture de l'éditeur de paramètres du niveau",
+            ["eam.settings.song"]                = "Titre",
+            ["eam.settings.artist"]              = "Artiste",
+            ["eam.settings.author"]              = "Auteur",
+            ["eam.settings.description"]         = "Description",
+            ["eam.settings.tags"]                = "Étiquettes",
+            ["eam.settings.difficulty"]          = "Difficulté",
+            ["eam.settings.seizureWarning"]      = "Avertissement épilepsie",
+            ["eam.settings.canBePlayedOn"]       = "Modes de jeu",
+            ["eam.settings.specialArtistType"]   = "Type d'artiste spécial",
+            ["eam.settings.artistPermission"]    = "Fichier d'autorisation artiste",
+            ["eam.settings.artistLinks"]         = "Liens artiste",
+            ["eam.settings.previewImage"]        = "Image de prévisualisation",
+            ["eam.settings.syringeIcon"]         = "Icône seringue",
+            ["eam.settings.previewSong"]         = "Chanson de prévisualisation",
+            ["eam.settings.previewSongStartTime"]= "Début de la prévisualisation",
+            ["eam.settings.previewSongDuration"] = "Durée de la prévisualisation",
+            ["eam.settings.songLabelHue"]        = "Teinte de l'étiquette",
+            ["eam.settings.songLabelGrayscale"]  = "Niveaux de gris de l'étiquette",
+            ["eam.settings.levelVolume"]         = "Volume du niveau",
+            ["eam.settings.firstBeatBehavior"]   = "Comportement au premier temps",
+            ["eam.settings.multiplayerAppearance"]= "Apparence multijoueur",
+            ["eam.settings.separate2PLevel"]     = "Niveau 2J séparé",
+            // Alias de noms de champs complets (utilisés par réflexion)
+            ["eam.settings.artistPermissionFileName"] = "Fichier d'autorisation artiste",
+            ["eam.settings.previewImageName"]         = "Image de prévisualisation",
+            ["eam.settings.syringeIconName"]          = "Icône seringue",
+            ["eam.settings.previewSongName"]          = "Chanson de prévisualisation",
+            ["eam.settings.separate2PLevelFilename"]  = "Niveau 2J séparé",
+            ["eam.settings.rankMaxMistakes"]          = "Nb max d'erreurs (classement)",
+            ["eam.settings.rankDescription"]          = "Descriptions du classement",
+            ["eam.editor.openRowEditor"]         = "Ouverture de l'éditeur de propriétés pour la piste {0}",
+            ["eam.sprite.editNotSupported"]      = "Édition de sprite non prise en charge",
+            ["eam.event.jumpAndPlay"]            = "Aller à {0} et lire",
+            ["eam.action.addRowOrSprite"]        = "Allez dans l'onglet Pistes ou Sprites pour ajouter une piste ou un sprite",
+            ["eam.char.selectPrompt"]            = "Sélectionnez un personnage — flèches pour naviguer, Entrée pour confirmer, Échap pour annuler",
+            ["eam.event.noTypesAvailable"]       = "Aucun type d'événement disponible dans l'onglet actuel",
+            ["eam.event.selectPrompt"]           = "Sélectionnez un type d'événement — flèches pour naviguer, Entrée pour confirmer, Échap pour annuler",
+            ["eam.grid.selectPrompt"]            = "Sélectionnez la taille de grille — flèches pour naviguer, chiffres pour sélection rapide, Entrée pour confirmer, Ctrl+Entrée pour valeur personnalisée, Échap pour annuler",
+            ["eam.grid.item"]                    = "Grille 1/{0}",
+            ["eam.grid.custom"]                  = "Grille personnalisée 1/{0}",
+            ["eam.grid.custom.label"]            = "Dénominateur",
+            ["eam.grid.custom.invalid"]          = "Dénominateur invalide, veuillez saisir un entier positif",
+            ["eam.event.createFailed"]           = "Impossible de créer le type d'événement {0}",
+            ["eam.event.createError"]            = "Échec de la création d'événement",
+            ["eam.event.created"]                = "Événement {0} créé",
+            ["eam.event.createdAndOpening"]      = "Événement {0} créé, ouverture de l'éditeur",
+            ["eam.track.noAvailable"]            = "Aucune piste disponible",
+            ["eam.sprite.noAvailable"]           = "Aucun sprite disponible",
+            ["eam.track.info"]                   = "Piste {0} {1} — {2} événements",
+            ["eam.sprite.info"]                  = "Sprite {0} {1} — {2} événements",
+            ["eam.event.noAvailable"]            = "Aucun événement disponible",
+            ["eam.event.noSelection"]            = "Aucun événement sélectionné",
+            ["eam.event.mixedMoveBlocked"]       = "Déplacement impossible : types de positionnement mixtes",
+            ["eam.event.commentNote"]            = "(Événement commentaire)",
+            ["eam.event.commentAt"]              = "Commentaire dans {0} : {1}",
+            ["eam.event.levelEndNote"]           = "(Fin du niveau)",
+            ["eam.event.customMethodNote"]       = "(Nécessite une méthode personnalisée)",
+            ["eam.event.tagNote"]                = "(Opération d'étiquette)",
+            ["eam.track.added"]                  = "Piste ajoutée, personnage : {0}",
+            ["eam.track.addedAndOpening"]        = "Piste ajoutée, personnage : {0}, ouverture de l'éditeur",
+            ["eam.sprite.added"]                 = "Sprite ajouté, personnage : {0}",
+            ["eam.confirm.changeRowType"]        = "Changer le type de piste supprimera les {0} événements de cette piste. Continuer ?",
+            ["eam.error.roomFull"]               = "La salle {0} est pleine, impossible de déplacer la piste",
+            ["eam.error.helperNotFound"]         = "Impossible de démarrer l'éditeur d'événements. Vérifiez que RDEventEditorHelper.exe est présent",
+            ["eam.helper.forceCancelled"]        = "Éditeur d'événements fermé de force",
+            ["eam.cursor.jump.title"]            = "Aller à la position",
+            ["eam.cursor.jump.bar"]              = "Mesure",
+            ["eam.cursor.jump.beat"]             = "Temps",
+            ["eam.cursor.jump.success"]          = "Saut vers {0}",
+
+            // Effets sonores
+            ["enum.SoundEffect.Shaker"]          = "Shaker",
+            ["enum.SoundEffect.Kick"]            = "Grosse caisse",
+            ["enum.SoundEffect.Snare"]           = "Caisse claire",
+            ["enum.SoundEffect.Hat"]             = "Charleston",
+            ["enum.SoundEffect.Sizzle"]          = "Cymbale ride",
+            ["enum.SoundEffect.Cowbell"]         = "Cowbell",
+            ["enum.SoundEffect.Clap"]            = "Clap",
+            ["enum.SoundEffect.Stick"]           = "Baguette",
+
+            // Ajustement rapide de propriété
+            ["eam.quickAdjust.noProperty"]       = "Aucune propriété sélectionnée",
+            ["eam.quickAdjust.notAdjustable"]    = "Cet événement n'a pas de propriétés ajustables",
+
+            // Valeurs booléennes
+            ["eam.bool.enabled"]                 = "Activé",
+            ["eam.bool.disabled"]                = "Désactivé",
+
+            // Texte enrichi et liens
+            ["eam.link.suffix"]                  = " Lien",
+            ["eam.link.menu.title"]              = "Menu de sélection de liens",
+            ["eam.link.menu.count"]              = "{0} liens au total",
+            ["eam.link.opening"]                 = "Ouverture du lien : {0}",
+            ["eam.link.cancelled"]               = "Annulé",
+            // Sélection virtuelle
+            ["eam.vsel.added"]                   = "{0} sélectionné",
+            ["eam.vsel.removed"]                 = "{0} désélectionné",
+            ["eam.vsel.cleared"]                 = "Sélection virtuelle effacée",
+            ["eam.vsel.empty"]                   = "La sélection virtuelle est vide",
+            ["eam.vsel.options"]                = "Options de sélection virtuelle",
+            ["eam.vsel.selectEvents"]           = "Sélectionner les événements de la sélection virtuelle",
+            ["eam.vsel.addSelected"]            = "Ajouter la sélection actuelle à la sélection virtuelle",
+            ["eam.vsel.selectedCount"]          = "{0} événements sélectionnés",
+            ["eam.vsel.addedCount"]             = "{0} événements ajoutés à la sélection virtuelle",
+            // Chaînes d'événements
+            ["eam.chain.noChains"]               = "Aucune chaîne d'événements disponible",
+            ["eam.chain.selectPrompt"]           = "Sélectionnez une chaîne d'événements — Haut/Bas pour naviguer, Gauche/Droite pour régler la vitesse, Entrée pour confirmer, Échap pour annuler",
+            ["eam.chain.inserted"]               = "Chaîne d'événements {0} insérée, {1} événements",
+            ["eam.chain.saved"]                  = "Chaîne d'événements sauvegardée : {0}",
+            ["eam.chain.saveFailed"]             = "Échec de la sauvegarde de la chaîne : {0}",
+            ["eam.chain.loadFailed"]             = "Échec du chargement de la chaîne : {0}",
+            ["eam.chain.invalidName"]            = "Nom de chaîne d'événements invalide",
+            ["eam.chain.nameLabel"]              = "Nom de la chaîne",
+            ["eam.chain.noLevel"]                = "Veuillez d'abord ouvrir un niveau",
+            ["eam.chain.skippedEvents"]          = "{0} événements ignorés (type manquant)",
+            ["eam.chain.speed"]                  = "Vitesse {0}x",
+            ["eam.bpmcalc.hint"]                 = "Appuyez 16 fois sur la barre d'espace en rythme avec la musique",
+            // Système de conditions
+            ["eam.conditional.menuHeader"]       = "Conditions de {0}",
+            ["eam.conditional.noConditionals"]   = "Aucune condition",
+            ["eam.conditional.stateNone"]        = "non définie",
+            ["eam.conditional.stateActive"]      = "active",
+            ["eam.conditional.stateNegated"]     = "inversée",
+            ["eam.conditional.activated"]        = "{0} activée",
+            ["eam.conditional.negated"]          = "{0} inversée",
+            ["eam.conditional.removed"]          = "{0} supprimée",
+            ["eam.conditional.noCondEmpty"]      = "Aucune condition. Appuyez sur N pour en créer une",
+            ["eam.conditional.openCreate"]       = "Ouverture du créateur de condition",
+            ["eam.conditional.openEdit"]         = "Ouverture de l'éditeur de condition",
+            ["eam.conditional.created"]          = "Condition {0} créée",
+            ["eam.conditional.edited"]           = "Condition {0} modifiée",
+            ["eam.conditional.deleted"]          = "Condition {0} supprimée",
+            ["eam.conditional.cannotEditGlobal"] = "Les conditions globales ne peuvent pas être modifiées",
+            ["eam.conditional.cannotDeleteGlobal"]   = "Les conditions globales ne peuvent pas être supprimées",
+            ["eam.conditional.deleteConfirmNoUsage"] = "Supprimer la condition {0} ? Appuyez à nouveau sur D pour confirmer, Échap pour annuler",
+            ["eam.conditional.deleteConfirmSingle"]  = "Supprimer la condition {0} ? 1 événement utilise cette condition. Appuyez à nouveau sur D pour confirmer, Échap pour annuler",
+            ["eam.conditional.deleteConfirm"]        = "Supprimer la condition {0} ? {1} événements utilisent cette condition. Appuyez à nouveau sur D pour confirmer, Échap pour annuler",
+            ["eam.conditional.tagLabel"]         = "Étiquette",
+            ["eam.conditional.descriptionLabel"] = "Description",
+            ["eam.playerMode.one"]               = "Mode un joueur",
+            ["eam.playerMode.two"]               = "Mode deux joueurs",
+            ["eam.tagMode.enabled"]              = "Mode étiquettes activé",
+            ["eam.tagMode.disabled"]             = "Mode étiquettes désactivé",
+            ["eam.tag.noTag"]                    = "Sans étiquette",
+        };
+
+        // Détecte si le jeu tourne en français en interrogeant le moteur de localisation du jeu
+        // lui-même (RDString.Get), ce qui garantit la cohérence avec le choix de langue in-game
+        // et non avec la locale du système d'exploitation.
+        private static bool? _isFrench;
+        private static bool IsFrench
+        {
+            get
+            {
+                if (_isFrench == null)
+                    _isFrench = RDString.Get("editor.continue") == "Continuer";
+                return _isFrench.Value;
+            }
+        }
+
         [HarmonyPrefix]
         public static bool GetPrefix(string key, ref string __result)
         {
             // 性能：非 eam./sound. key 仅多一次 StartsWith 检查（< 10ns）
             if (key == null || (!key.StartsWith("eam.") && !key.StartsWith("sound."))) return true;
-            var dict = RDString.isChinese ? _zh : _en;
+            var dict = RDString.isChinese ? _zh : (IsFrench ? _fr : _en);
             __result = dict.TryGetValue(key, out string val) ? val : key;
             return false; // 拦截原方法
         }
